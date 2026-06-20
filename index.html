@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Maya: Teknik Pengolahan Pangan Kontinental</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        /* Custom scrollbar for theory card columns without breaking page scroll */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(241, 245, 249, 0.5);
+            border-radius: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(203, 213, 225, 1);
+            border-radius: 8px;
+        }
+        /* Boiling bubble animation */
+        @keyframes bubble {
+            0% { transform: translateY(0) scale(0.8); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
+        }
+        .bubble-active {
+            animation: bubble 1.2s infinite ease-out;
+        }
+        /* Sizzling smoke animation */
+        @keyframes sizzle {
+            0% { transform: scale(1) translateY(0); opacity: 0.2; }
+            50% { transform: scale(1.1) translateY(-10px); opacity: 0.6; }
+            100% { transform: scale(1.2) translateY(-20px); opacity: 0; }
+        }
+        .smoke {
+            animation: sizzle 1.5s infinite ease-in-out;
+        }
+        /* Pan shaking animation */
+        @keyframes panShake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(1deg) translateY(-1px); }
+            75% { transform: rotate(-1deg) translateY(1px); }
+        }
+        .pan-shake {
+            animation: panShake 0.15s infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-2 md:p-4 overflow-hidden">
+
+    <!-- MAIN 16:9 CONTAINER -->
+    <div class="w-full max-w-6xl aspect-[16/9] bg-slate-950 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col relative">
+        
+        <!-- SPLASH SCREEN OVERLAY (16:9 Bounded) -->
+        <div id="splash-screen" class="absolute inset-0 bg-slate-950 z-50 flex items-center justify-center p-8 transition-all duration-700 ease-in-out">
+            <div class="grid grid-cols-12 gap-8 w-full max-w-5xl items-center">
+                
+                <!-- Left: Beautiful framed image -->
+                <div class="col-span-5 flex justify-center">
+                    <div class="relative group">
+                        <!-- Neon ambient glow effect behind image -->
+                        <div class="absolute -inset-1.5 bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl blur opacity-40 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+                        <div class="relative bg-slate-900 p-2 rounded-2xl border border-slate-700/50 shadow-2xl overflow-hidden max-w-xs md:max-w-sm">
+                            <img src="asset/img/thumbnail_2.png" alt="Splash Screen Lab Maya" class="rounded-xl w-full aspect-square object-cover">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Title, Loading Indicator & Start Action -->
+                <div class="col-span-7 flex flex-col justify-center space-y-6">
+                    <div class="space-y-2">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                            <i class="fa-solid fa-graduation-cap"></i> Media Pembelajaran Interaktif
+                        </span>
+                        <h1 class="text-2xl md:text-4xl font-black tracking-tight leading-none bg-gradient-to-r from-slate-100 via-amber-200 to-amber-500 bg-clip-text text-transparent uppercase">
+                            LAB MAYA KULINER KONTINENTAL
+                        </h1>
+                        <p class="text-xs md:text-sm text-slate-400 font-medium">
+                            Eksperimen Interaktif Teknik Pengolahan Produk Olahan Pangan Kontinental. Dirancang khusus untuk Prakarya & Kewirausahaan (Pengolahan) Kelas XI / Fase F.
+                        </p>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="h-[1px] w-full bg-slate-800/80"></div>
+
+                    <!-- Loading Phase Container -->
+                    <div id="loading-container" class="space-y-2">
+                        <div class="flex justify-between items-center text-xs text-slate-400">
+                            <span id="loading-status-text" class="italic animate-pulse">Memuat modul simulasi...</span>
+                            <span id="loading-percentage" class="font-bold text-amber-400">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                            <div id="loading-progress-bar" class="bg-gradient-to-r from-amber-500 to-orange-500 h-full w-0 transition-all duration-150 ease-out"></div>
+                        </div>
+                    </div>
+
+                    <!-- Start Button Container (Hidden initially until loading is done) -->
+                    <div id="start-container" class="hidden transform scale-95 opacity-0 transition-all duration-500">
+                        <button onclick="dismissSplash()" class="group relative inline-flex items-center gap-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs md:text-sm py-3.5 px-8 rounded-xl shadow-xl shadow-amber-500/25 tracking-wider uppercase transition-all hover:scale-[1.03] duration-300">
+                            <i class="fa-solid fa-play text-lg group-hover:scale-125 transition-transform"></i>
+                            Masuk Ke Lab Maya
+                            <div class="absolute -inset-1 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 opacity-20 blur-sm group-hover:opacity-45 transition duration-300"></div>
+                        </button>
+                        <p class="text-[10px] text-slate-500 mt-2 italic flex items-center gap-1.5">
+                            <i class="fa-solid fa-volume-high text-amber-500/70"></i> Mengaktifkan efek suara interaktif saat diklik.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        
+        <!-- HEADER -->
+        <header class="bg-slate-900/90 border-b border-slate-800 px-6 py-3 flex items-center justify-between z-10">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-500 text-slate-950 p-2 rounded-lg flex items-center justify-center font-bold text-xl shadow-lg shadow-amber-500/20">
+                    <i class="fa-solid fa-kitchen-set"></i>
+                </div>
+                <div>
+                    <h1 class="text-base md:text-lg font-extrabold tracking-tight bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">LAB MAYA: KULINER KONTINENTAL</h1>
+                    <p class="text-xs text-slate-400">Prakarya & Kewirausahaan (Pengolahan) • Kelas XI / Fase F</p>
+                </div>
+            </div>
+            
+            <!-- Tab Controls -->
+            <nav class="flex bg-slate-950/80 p-1 rounded-xl border border-slate-800 gap-1">
+                <button onclick="switchTab('teori')" id="tab-teori" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 bg-amber-500 text-slate-950 shadow-md">
+                    <i class="fa-solid fa-book-open mr-1"></i> Teori
+                </button>
+                <button onclick="switchTab('prosedur')" id="tab-prosedur" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all duration-200">
+                    <i class="fa-solid fa-list-check mr-1"></i> Prosedur
+                </button>
+                <button onclick="switchTab('simulasi')" id="tab-simulasi" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all duration-200">
+                    <i class="fa-solid fa-flask-vial mr-1"></i> Simulasi
+                </button>
+                <button onclick="switchTab('lkpd')" id="tab-lkpd" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all duration-200">
+                    <i class="fa-solid fa-file-invoice mr-1"></i> LKPD
+                </button>
+                <button onclick="switchTab('pengembang')" id="tab-pengembang" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition-all duration-200">
+                    <i class="fa-solid fa-code mr-1"></i> Pengembang
+                </button>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <button onclick="toggleSound()" id="sound-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 w-8 h-8 rounded-lg flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+                <button onclick="resetLab()" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                </button>
+            </div>
+        </header>
+
+        <!-- CONTENT AREA (Flex Grow, Scroll-hidden, exactly styled for 16:9 view) -->
+        <main class="flex-grow p-4 relative overflow-hidden bg-slate-950/40">
+            
+            <!-- TAB: TEORI -->
+            <div id="content-teori" class="tab-content h-full grid grid-cols-12 gap-4">
+                <!-- Left: List of Techniques -->
+                <div class="col-span-4 bg-slate-900/50 rounded-xl border border-slate-800 p-3 flex flex-col gap-1.5 overflow-y-auto custom-scroll">
+                    <h3 class="text-xs font-bold text-amber-500 uppercase tracking-widest px-2 mb-1">9 Teknik Kontinental</h3>
+                    <div id="technique-list" class="space-y-1">
+                        <!-- Techniques rendered via JS -->
+                    </div>
+                </div>
+                <!-- Right: Technique Details -->
+                <div class="col-span-8 bg-slate-900/40 rounded-xl border border-slate-800/80 p-5 flex flex-col justify-between overflow-hidden">
+                    <div id="technique-detail" class="h-full flex flex-col justify-between">
+                        <!-- Detail rendered dynamically by selectTechnique() -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: PROSEDUR -->
+            <div id="content-prosedur" class="tab-content hidden h-full grid grid-cols-12 gap-4">
+                <!-- Left: Recipe Selector & Raw Ingredients -->
+                <div class="col-span-4 flex flex-col gap-3">
+                    <div class="bg-slate-900/50 rounded-xl border border-slate-800 p-4">
+                        <label class="block text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">Pilih Resep Kontinental</label>
+                        <select id="recipe-select" onchange="loadRecipe()" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                            <option value="steak">Classic Beef Tenderloin Steak</option>
+                            <option value="soup">Creamy Wild Mushroom Soup</option>
+                            <option value="croissant">Crispy Butter Croissant</option>
+                        </select>
+                    </div>
+                    <div class="bg-slate-900/50 rounded-xl border border-slate-800 p-4 flex-grow flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Bahan Utama & Karakteristik</h4>
+                            <div id="recipe-ingredients" class="space-y-2 text-xs">
+                                <!-- Ingredients injected via JS -->
+                            </div>
+                        </div>
+                        <div class="bg-slate-950/60 p-3 rounded-lg border border-slate-800/60 text-[11px] text-amber-500/90 italic flex gap-2">
+                            <i class="fa-solid fa-circle-info text-base shrink-0 mt-0.5"></i>
+                            <span>Tip: Perhatikan urutan teknik pengolahan untuk menghasilkan kematangan, tekstur, dan rasa yang sempurna sesuai standar kontinental.</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Right: Interactive Step Timeline -->
+                <div class="col-span-8 bg-slate-900/30 rounded-xl border border-slate-800 p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 id="recipe-title" class="text-lg font-extrabold text-slate-100">Classic Beef Tenderloin Steak</h3>
+                            <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold">Menu Utama</span>
+                        </div>
+                        <div id="recipe-steps" class="space-y-4">
+                            <!-- Steps progress list -->
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-slate-800/80 pt-4">
+                        <span class="text-xs text-slate-400">Gunakan tab <strong class="text-amber-500">Simulasi</strong> setelah mempelajari prosedur untuk mencoba pengolahan mandiri.</span>
+                        <div class="flex gap-2">
+                            <button id="prev-step-btn" onclick="recipeStep(-1)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-1.5 px-3 rounded-lg transition-colors">Sebelumnya</button>
+                            <button id="next-step-btn" onclick="recipeStep(1)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold py-1.5 px-3 rounded-lg transition-all">Lanjut Langkah</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: SIMULASI (Virtual Cooking Sandbox) -->
+            <div id="content-simulasi" class="tab-content hidden h-full grid grid-cols-12 gap-4">
+                <!-- Setup Column -->
+                <div class="col-span-4 bg-slate-900/50 rounded-xl border border-slate-800 p-4 flex flex-col justify-between overflow-y-auto custom-scroll">
+                    <div class="space-y-4">
+                        <div>
+                            <span class="text-[10px] font-extrabold text-amber-500 uppercase tracking-widest block mb-2">Langkah 1: Pilih Bahan Baku</span>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="selectIngredient('beef')" id="ing-beef" class="ingredient-btn bg-slate-950 border border-slate-800 hover:border-slate-700 p-2 rounded-lg flex flex-col items-center justify-center transition-all">
+                                    <span class="text-xl">🥩</span>
+                                    <span class="text-[10px] font-semibold mt-1">Daging Sapi</span>
+                                </button>
+                                <button onclick="selectIngredient('potato')" id="ing-potato" class="ingredient-btn bg-slate-950 border border-slate-800 hover:border-slate-700 p-2 rounded-lg flex flex-col items-center justify-center transition-all">
+                                    <span class="text-xl">🥔</span>
+                                    <span class="text-[10px] font-semibold mt-1">Kentang</span>
+                                </button>
+                                <button onclick="selectIngredient('fish')" id="ing-fish" class="ingredient-btn bg-slate-950 border border-slate-800 hover:border-slate-700 p-2 rounded-lg flex flex-col items-center justify-center transition-all">
+                                    <span class="text-xl">🐟</span>
+                                    <span class="text-[10px] font-semibold mt-1">Ikan Fillet</span>
+                                </button>
+                                <button onclick="selectIngredient('dough')" id="ing-dough" class="ingredient-btn bg-slate-950 border border-slate-800 hover:border-slate-700 p-2 rounded-lg flex flex-col items-center justify-center transition-all">
+                                    <span class="text-xl">🥐</span>
+                                    <span class="text-[10px] font-semibold mt-1">Adonan Pastry</span>
+                                </button>
+                                <button onclick="selectIngredient('vegetables')" id="ing-vegetables" class="ingredient-btn bg-slate-950 border border-slate-800 hover:border-slate-700 p-2 rounded-lg flex flex-col items-center justify-center transition-all">
+                                    <span class="text-xl">🥦</span>
+                                    <span class="text-[10px] font-semibold mt-1">Sayuran</span>
+                                </button>
+                                <button onclick="selectIngredient('milk')" id="ing-milk" class="ingredient-btn bg-slate-950 border border-slate-800 hover:border-slate-700 p-2 rounded-lg flex flex-col items-center justify-center transition-all">
+                                    <span class="text-xl">🥛</span>
+                                    <span class="text-[10px] font-semibold mt-1">Susu Cair</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="text-[10px] font-extrabold text-amber-500 uppercase tracking-widest block mb-2">Langkah 2: Pilih Teknik Pengolahan</span>
+                            <div class="grid grid-cols-3 gap-1.5">
+                                <button onclick="selectSimTechnique('boiling')" id="tech-boiling" class="tech-btn bg-slate-950 border border-slate-800 text-[10px] font-medium py-1.5 rounded transition-all">Boiling</button>
+                                <button onclick="selectSimTechnique('roasting')" id="tech-roasting" class="tech-btn bg-slate-950 border border-slate-800 text-[10px] font-medium py-1.5 rounded transition-all">Roasting</button>
+                                <button onclick="selectSimTechnique('grilling')" id="tech-grilling" class="tech-btn bg-slate-950 border border-slate-800 text-[10px] font-medium py-1.5 rounded transition-all">Grilling</button>
+                                <button onclick="selectSimTechnique('frying')" id="tech-frying" class="tech-btn bg-slate-950 border border-slate-800 text-[10px] font-medium py-1.5 rounded transition-all">Frying</button>
+                                <button onclick="selectSimTechnique('steaming')" id="tech-steaming" class="tech-btn bg-slate-950 border border-slate-800 text-[10px] font-medium py-1.5 rounded transition-all">Steaming</button>
+                                <button onclick="selectSimTechnique('fermenting')" id="tech-fermenting" class="tech-btn bg-slate-950 border border-slate-800 text-[10px] font-medium py-1.5 rounded transition-all">Fermenting</button>
+                                <button onclick="selectSimTechnique('braising')" id="tech-braising" class="tech-btn bg-slate-950 border border-slate-800 text-[10px] font-medium py-1.5 rounded transition-all">Braising</button>
+                                <button onclick="selectSimTechnique('curing')" id="tech-curing" class="tech-btn bg-slate-950 border border-slate-800 text-[10px] font-medium py-1.5 rounded transition-all">Curing</button>
+                                <button onclick="selectSimTechnique('sauteeing')" id="tech-sauteeing" class="tech-btn bg-slate-950 border border-slate-800 text-[10px] font-medium py-1.5 rounded transition-all">Sauteeing</button>
+                            </div>
+                        </div>
+
+                        <!-- Param Sliders -->
+                        <div class="space-y-3 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                            <div>
+                                <div class="flex justify-between text-[11px] mb-1">
+                                    <span class="text-slate-400">Suhu (°C)</span>
+                                    <span id="temp-val" class="font-bold text-amber-400">100°C</span>
+                                </div>
+                                <input type="range" id="temp-slider" min="5" max="300" value="100" oninput="updateSliders()" class="w-full accent-amber-500 bg-slate-800 h-1 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-[11px] mb-1">
+                                    <span class="text-slate-400">Durasi (Menit / Hari)</span>
+                                    <span id="time-val" class="font-bold text-amber-400">10 menit</span>
+                                </div>
+                                <input type="range" id="time-slider" min="1" max="120" value="10" oninput="updateSliders()" class="w-full accent-amber-500 bg-slate-800 h-1 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="startCooking()" id="cook-btn" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold py-2.5 rounded-lg text-xs tracking-wider uppercase transition-all shadow-lg shadow-amber-500/10 mt-3 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-fire-burner"></i> Mulai Memasak
+                    </button>
+                </div>
+
+                <!-- Simulation Visual Stage -->
+                <div class="col-span-8 bg-slate-900/30 rounded-xl border border-slate-800 p-4 flex flex-col justify-between relative overflow-hidden">
+                    
+                    <!-- Top Status Bar -->
+                    <div class="flex justify-between items-center border-b border-slate-800/80 pb-2 z-10">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                            <span class="text-xs font-semibold text-slate-300">Status Dapur: <span id="kitchen-status">Siap Memulai</span></span>
+                        </div>
+                        <div class="text-[11px] text-slate-400 flex items-center gap-2">
+                            <span>Kecocokan Bahan & Teknik:</span>
+                            <span id="match-indicator" class="px-2 py-0.5 rounded font-bold bg-slate-950 text-slate-500">N/A</span>
+                        </div>
+                    </div>
+
+                    <!-- Cooking Canvas Area -->
+                    <div class="flex-grow flex items-center justify-center relative my-4">
+                        <!-- Bubbles / Smoke Layer -->
+                        <div id="animation-layer" class="absolute inset-0 pointer-events-none flex items-center justify-center">
+                            <!-- Dynamically generated bubble particles or smoke waves -->
+                        </div>
+
+                        <!-- Main Cooking Tool Graphic with SVGs -->
+                        <div id="cooking-tool-container" class="w-64 h-64 relative transition-all duration-300 flex items-center justify-center">
+                            <!-- Base stove glow -->
+                            <div id="stove-glow" class="absolute bottom-1 w-32 h-6 bg-orange-600/0 rounded-full blur-xl transition-all duration-500"></div>
+                            
+                            <!-- Main Tool Container (e.g. pot, pan, oven) -->
+                            <div id="stove-appliance" class="w-48 h-48 flex items-center justify-center relative">
+                                <!-- Default Board graphic -->
+                                <svg class="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="10" y="75" width="80" height="10" rx="4" fill="#334155"/>
+                                    <circle cx="50" cy="45" r="25" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                                    <path d="M40 45 L60 45 M50 35 L50 55" stroke="#334155" stroke-width="2" stroke-linecap="round"/>
+                                    <text x="50" y="93" fill="#64748b" font-size="6" font-weight="bold" text-anchor="middle">MEJA PREPARASI</text>
+                                </svg>
+                            </div>
+
+                            <!-- Inside/On-top Ingredient SVG Graphic -->
+                            <div id="food-visual" class="absolute w-24 h-24 flex items-center justify-center transition-all duration-1000">
+                                <!-- Dynamic Raw or Cooked food SVG -->
+                                <span class="text-4xl filter drop-shadow">❓</span>
+                            </div>
+                        </div>
+
+                        <!-- Progress Overlay for cooking -->
+                        <div id="cooking-progress-overlay" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+                            <div class="text-center space-y-3 max-w-xs">
+                                <span class="text-3xl animate-bounce inline-block">🍳</span>
+                                <h4 class="font-extrabold text-sm tracking-wide text-amber-500">SEDANG MENGOLAH...</h4>
+                                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700">
+                                    <div id="cooking-progress-bar" class="bg-gradient-to-r from-amber-500 to-orange-500 h-full w-0 transition-all ease-linear"></div>
+                                </div>
+                                <p id="cooking-progress-sub" class="text-[10px] text-slate-400 italic">Mengonversi molekul & struktur kolagen bahan...</p>
+                            </div>
+                        </div>
+
+                        <!-- Result Modal Card inside Canvas for immersive experience -->
+                        <div id="result-overlay" class="absolute inset-0 bg-slate-950/95 rounded-xl border border-slate-800 p-6 flex flex-col justify-between opacity-0 pointer-events-none transition-all duration-300 scale-95">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="text-[9px] font-extrabold text-amber-500 tracking-wider uppercase block">Hasil Pengolahan</span>
+                                    <h3 id="result-title" class="text-lg font-black text-slate-100">Dish Name</h3>
+                                </div>
+                                <div id="result-rating" class="flex gap-1 text-amber-400 text-sm">
+                                    <!-- Stars rendered here -->
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 my-3 items-center">
+                                <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800/80 flex items-center justify-center h-28 relative">
+                                    <div id="result-food-svg" class="w-24 h-24 flex items-center justify-center"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-xs border-b border-slate-800/80 pb-1">
+                                        <span class="text-slate-400">Kematangan:</span>
+                                        <span id="result-doneness" class="font-semibold text-green-400">Perfect</span>
+                                    </div>
+                                    <div class="flex justify-between text-xs border-b border-slate-800/80 pb-1">
+                                        <span class="text-slate-400">Tekstur:</span>
+                                        <span id="result-texture" class="font-semibold">Tender</span>
+                                    </div>
+                                    <p id="result-desc" class="text-[11px] text-slate-300 leading-relaxed italic">Review text details.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center border-t border-slate-800/80 pt-3">
+                                <span class="text-[10px] text-slate-400">Eksperimen lain dengan bahan baku yang berbeda!</span>
+                                <div class="flex gap-2">
+                                    <button onclick="claimToLKPD()" class="bg-green-600 hover:bg-green-500 text-slate-950 text-xs font-extrabold py-1.5 px-3 rounded-lg transition-all flex items-center gap-1">
+                                        <i class="fa-solid fa-file-export"></i> Catat di LKPD
+                                    </button>
+                                    <button onclick="closeResult()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-1.5 px-3 rounded-lg transition-all">Simulasi Baru</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Technical Dashboard Readout -->
+                    <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-800 flex justify-between items-center text-[11px]">
+                        <div class="flex gap-4">
+                            <div><span class="text-slate-400">Bahan Baku:</span> <strong id="readout-ing" class="text-amber-400">Belum dipilih</strong></div>
+                            <div><span class="text-slate-400">Teknik:</span> <strong id="readout-tech" class="text-amber-400">Belum dipilih</strong></div>
+                        </div>
+                        <div class="text-[10px] text-slate-500">Mata Pelajaran PKWU • Pengolahan Kontinental</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- TAB: LKPD -->
+            <div id="content-lkpd" class="tab-content hidden h-full grid grid-cols-12 gap-4">
+                <!-- Left: Student Worksheet Bio & Simulator Logs -->
+                <div class="col-span-5 bg-slate-900/50 rounded-xl border border-slate-800 p-4 flex flex-col justify-between overflow-y-auto custom-scroll">
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold text-amber-500 uppercase tracking-wider mb-2">Identitas & Jurnal Praktikum</h3>
+                        
+                        <!-- Profile Inputs -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-400 font-medium mb-1">Nama Lengkap</label>
+                                <input type="text" id="student-name" value="Siswa Berbakat" class="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1 text-xs text-slate-200 focus:ring-1 focus:ring-amber-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 font-medium mb-1">Kelas / No. Presensi</label>
+                                <input type="text" id="student-class" value="XI - Kuliner 1" class="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1 text-xs text-slate-200 focus:ring-1 focus:ring-amber-500 outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Log Hasil Simulasi -->
+                        <div class="pt-2">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[11px] font-bold text-slate-400">Jurnal Eksperimen Simulasi:</span>
+                                <span class="text-[10px] text-slate-500" id="jurnal-count">0 Eksperimen</span>
+                            </div>
+                            <div id="jurnal-container" class="space-y-1.5 max-h-36 overflow-y-auto custom-scroll pr-1">
+                                <div class="text-[11px] text-slate-500 text-center py-4 italic border border-dashed border-slate-800 rounded-lg">
+                                    Belum ada catatan simulasi. Lakukan simulasi dan klik "Catat di LKPD" untuk menyimpan jurnal.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-800/80 pt-3 flex gap-2">
+                        <button onclick="printReport()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold py-2 rounded-lg transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-print"></i> Cetak Laporan (PDF)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Interactive Concept Evaluation Grid -->
+                <div class="col-span-7 bg-slate-900/30 rounded-xl border border-slate-800 p-4 flex flex-col justify-between overflow-y-auto custom-scroll">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-bold text-slate-200">Evaluasi Pemahaman Konseptual</h3>
+                            <span class="text-[10px] bg-slate-800 text-amber-400 px-2 py-0.5 rounded font-bold" id="quiz-score">Skor: 0 / 100</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mb-3">Pilihlah opsi teknik pengolahan kontinental yang paling tepat untuk studi kasus di bawah ini:</p>
+                        
+                        <div class="space-y-3 text-xs" id="quiz-questions">
+                            <!-- Questions rendered via JS -->
+                        </div>
+                    </div>
+
+                    <button onclick="submitQuiz()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-2 rounded-lg transition-all text-xs uppercase tracking-wider mt-4">
+                        Evaluasi & Nilai Jawaban
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: PENGEMBANG -->
+            <div id="content-pengembang" class="tab-content hidden h-full flex items-center justify-center">
+                <div class="max-w-2xl bg-slate-900/50 rounded-2xl border border-slate-800 p-6 md:p-8 flex gap-6 items-center shadow-2xl backdrop-blur-sm relative">
+                    <!-- Premium Profile Photo Container with Gold/Amber ring frame -->
+                    <div class="relative shrink-0">
+                        <div class="absolute -inset-1.5 bg-gradient-to-tr from-amber-500 via-orange-500 to-red-600 rounded-full blur opacity-40 animate-pulse"></div>
+                        <div class="relative w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden border-2 border-amber-400 shadow-2xl bg-slate-950">
+                            <!-- High-quality cropped representation fitting properly -->
+                            <img src="asset/img/pengembang.png" alt="Anis Ilahi, M.Pd." class="w-full h-full object-cover object-top scale-[1.08] translate-y-0.5">
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-[10px] font-black px-3 py-1 rounded-full shadow-lg border border-slate-950 uppercase tracking-wider">
+                            Guru PKWU
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Details and Elegant Social Media Integrations -->
+                    <div class="space-y-3.5 flex-grow">
+                        <div>
+                            <span class="text-[9px] font-extrabold text-amber-400 uppercase tracking-widest block mb-0.5">Penyusun & Pengembang Media</span>
+                            <h2 class="text-xl md:text-2xl font-black text-slate-100 tracking-tight leading-none">Anis Ilahi, M.Pd.</h2>
+                            <p class="text-xs text-slate-300 font-semibold flex items-center gap-2 mt-2">
+                                <i class="fa-solid fa-graduation-cap text-amber-500 text-sm"></i> 
+                                <span>Guru Mapel: Prakarya dan Kewirausahaan</span>
+                            </p>
+                            <p class="text-xs text-slate-400 font-medium flex items-center gap-2 mt-1">
+                                <i class="fa-solid fa-school text-orange-500 text-xs"></i> 
+                                <span>Instansi: SMAN 1 Parongpong</span>
+                            </p>
+                        </div>
+
+                        <!-- Mini Separator -->
+                        <div class="h-[1px] w-full bg-slate-800"></div>
+
+                        <p class="text-[11px] text-slate-400 leading-relaxed max-w-sm">
+                            Inisiator laboratorium kuliner virtual ini. Berkomitmen menghadirkan pengajaran interaktif dan aplikatif demi menyukseskan implementasi Kurikulum Merdeka Fase F.
+                        </p>
+
+                        <!-- Premium Styled Social Media Grid -->
+                        <div class="flex gap-3 pt-1">
+                            <!-- Instagram Badge Link -->
+                            <a href="https://instagram.com/anisilahi_" target="_blank" class="flex items-center gap-2 bg-gradient-to-r from-pink-600/10 to-purple-600/10 hover:from-pink-600/20 hover:to-purple-600/20 border border-pink-500/25 hover:border-pink-500/50 text-pink-300 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-300 hover:-translate-y-0.5">
+                                <i class="fa-brands fa-instagram text-base"></i>
+                                <span>@anisilahi_</span>
+                            </a>
+                            <!-- YouTube Badge Link -->
+                            <a href="https://youtube.com/@anisilahichannel" target="_blank" class="flex items-center gap-2 bg-gradient-to-r from-red-600/10 to-orange-600/10 hover:from-red-600/20 hover:to-orange-600/20 border border-red-500/25 hover:border-red-500/50 text-red-300 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-300 hover:-translate-y-0.5">
+                                <i class="fa-brands fa-youtube text-base"></i>
+                                <span>anisilahichannel</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- DATA & LOGIC JAVASCRIPT -->
+    <script>
+        // --- 1. DATA STRUCTURES ---
+        const techniques = [
+            {
+                id: 'boiling',
+                name: 'Boiling (Merebus)',
+                icon: 'fa-solid fa-water',
+                color: 'text-blue-400',
+                desc: 'Teknik memasak bahan makanan dalam cairan (air, kaldu, atau susu) yang sedang mendidih pada suhu 100°C secara konstan.',
+                char: 'Cairan bergelembung penuh di seluruh permukaan. Sangat baik untuk bahan bertekstur keras.',
+                rules: 'Bahan harus tenggelam sepenuhnya. Bagus untuk melunakkan kolagen atau pati.',
+                bestIngredients: ['Kentang', 'Daging Sapi (Potongan Keras)', 'Sayuran Akar'],
+                idealTemp: '100°C',
+                idealTime: '15 - 45 Menit',
+                finalResult: 'Tekstur lunak, gizi dapat larut di cairan perebus.'
+            },
+            {
+                id: 'roasting',
+                name: 'Roasting & Baking (Memanggang Oven)',
+                icon: 'fa-solid fa-temperature-arrow-up',
+                color: 'text-orange-400',
+                desc: 'Memasak makanan menggunakan panas kering dari udara panas sirkulasi di dalam oven tertutup.',
+                char: 'Panas merata dari segala arah. Membentuk kerak kecokelatan (reaksi Maillard) yang aromatik.',
+                rules: 'Suhu stabil, posisi loyang menentukan distribusi kematangan.',
+                bestIngredients: ['Adonan Pastry', 'Daging Sapi Utuh (Roast)', 'Ayam Utuh'],
+                idealTemp: '180°C - 220°C',
+                idealTime: '20 - 90 Menit',
+                finalResult: 'Permukaan renyah dan kecokelatan emas, bagian dalam tetap lembap.'
+            },
+            {
+                id: 'grilling',
+                name: 'Grilling (Memanggang Bara/Grill)',
+                icon: 'fa-solid fa-fire',
+                color: 'text-red-400',
+                desc: 'Memasak makanan langsung di atas sumber panas kering yang sangat tinggi (arang, gas, atau elemen pemanas listrik).',
+                char: 'Suhu permukaan sangat tinggi. Memberikan aroma khas asap kayu/arang.',
+                rules: 'Gunakan minyak tipis agar tidak lengket. Balik sekali saja untuk mempertahankan sari makanan.',
+                bestIngredients: ['Daging Sapi (Steak Tender)', 'Ikan Fillet', 'Sosis/Burger'],
+                idealTemp: '230°C - 260°C',
+                idealTime: '3 - 10 Menit',
+                finalResult: 'Garis arang estetik, aroma berasap, rasa terkunci erat.'
+            },
+            {
+                id: 'frying',
+                name: 'Frying (Deep/Shallow Frying)',
+                icon: 'fa-solid fa-shrimp',
+                color: 'text-amber-400',
+                desc: 'Memasak bahan makanan dalam media minyak goreng atau lemak panas yang cukup banyak hingga matang merata.',
+                char: 'Transfer panas sangat cepat melalui cairan lemak panas.',
+                rules: 'Suhu minyak harus tepat (tidak terlalu dingin agar tidak menyerap minyak berlebih, tidak terlalu panas agar tidak gosong luar).',
+                bestIngredients: ['Kentang (French Fries)', 'Ikan Balur Tepung', 'Ayam'],
+                idealTemp: '170°C - 190°C',
+                idealTime: '5 - 15 Menit',
+                finalResult: 'Lapisan luar sangat renyah (crispy) dan kering, bagian dalam matang lembut.'
+            },
+            {
+                id: 'steaming',
+                name: 'Steaming (Mengukus)',
+                icon: 'fa-solid fa-cloud',
+                color: 'text-sky-300',
+                desc: 'Memasak makanan menggunakan uap air panas yang mendidih yang dialirkan secara konstan ke wadah makanan.',
+                char: 'Suhu memasak stabil di sekitar 100°C dengan kelembapan 100%.',
+                rules: 'Tutup kukusan harus rapat agar tekanan uap stabil. Zat gizi makanan terjaga optimal.',
+                bestIngredients: ['Ikan Fillet', 'Sayuran Hijau', 'Pudding Roti'],
+                idealTemp: '100°C',
+                idealTime: '8 - 20 Menit',
+                finalResult: 'Tekstur lembut basah, warna bahan tetap cerah alami, nutrisi utuh.'
+            },
+            {
+                id: 'fermenting',
+                name: 'Fermenting (Fermentasi Kuliner)',
+                icon: 'fa-solid fa-bacteria',
+                color: 'text-green-400',
+                desc: 'Proses pengolahan biologis memanfaatkan mikroorganisme (bakteri, ragi) untuk memecah pati/gula pangan.',
+                char: 'Suhu inkubasi hangat yang spesifik. Memerlukan wadah higienis.',
+                rules: 'Sterilisasi wajib dilakukan agar tidak terkontaminasi bakteri pembusuk.',
+                bestIngredients: ['Susu Cair (Yogurt/Keju)', 'Adonan Ragi', 'Sari Buah'],
+                idealTemp: '30°C - 42°C',
+                idealTime: '12 Jam - Banyak Hari',
+                finalResult: 'Rasa asam-gurih yang khas, masa simpan lama, tekstur mengental.'
+            },
+            {
+                id: 'braising',
+                name: 'Braising (Merebus Perlahan/Setup)',
+                icon: 'fa-solid fa-bowl-food',
+                color: 'text-yellow-600',
+                desc: 'Metode memasak kombinasi: menumis bahan sebentar (searing) lalu merebusnya perlahan dengan sedikit cairan dalam wadah tertutup rapat.',
+                char: 'Mematangkan serat kolagen yang keras secara perlahan di bawah titik didih.',
+                rules: 'Gunakan cairan kaya rasa seperti kaldu. Tutup panci serapat mungkin.',
+                bestIngredients: ['Daging Sapi Keras (Sengkel)', 'Sayuran Akar Keras', 'Ayam Tua'],
+                idealTemp: '85°C - 95°C',
+                idealTime: '60 - 180 Menit',
+                finalResult: 'Daging sangat empuk hingga lepas dari tulang, kuah mengental kaya rasa.'
+            },
+            {
+                id: 'curing',
+                name: 'Curing (Penggaraman/Pengawetan)',
+                icon: 'fa-solid fa-cubes',
+                color: 'text-rose-300',
+                desc: 'Metode pengolahan kontinental kuno menggunakan garam dapur, nitrat, atau gula untuk menarik kelembapan bahan makanan.',
+                char: 'Mengurangi aktivitas air bebas (Aw) mencegah pertumbuhan mikroba.',
+                rules: 'Keseimbangan konsentrasi garam sangat menentukan keamanan dan rasa produk.',
+                bestIngredients: ['Daging Sapi (Smoked Beef)', 'Ikan Salmon (Gravlax)', 'Daging Sapi Segar'],
+                idealTemp: '4°C - 12°C',
+                idealTime: '2 - 14 Hari',
+                finalResult: 'Kadar air menurun drastis, warna daging kemerahan stabil, awet.'
+            },
+            {
+                id: 'sauteeing',
+                name: 'Sauteeing (Menumis)',
+                icon: 'fa-solid fa-shuttle-space',
+                color: 'text-pink-400',
+                desc: 'Memasak makanan dengan cepat menggunakan sedikit minyak/mentega di atas wajan datar bersuhu tinggi.',
+                char: 'Bahan sering diputar atau digoyang di atas wajan agar matang kilat merata.',
+                rules: 'Bahan harus dipotong seragam dan relatif tipis agar cepat matang.',
+                bestIngredients: ['Sayuran Hijau', 'Daging Sapi Iris Tipis', 'Cendawan/Jamur'],
+                idealTemp: '160°C - 200°C',
+                idealTime: '2 - 5 Menit',
+                finalResult: 'Warna sayuran sangat cerah, renyah, beraroma harum mentega panas.'
+            }
+        ];
+
+        const recipes = {
+            steak: {
+                title: "Classic Beef Tenderloin Steak",
+                badge: "Menu Utama",
+                ingredients: [
+                    "🥩 <strong>Daging Sapi Has Dalam (Tenderloin)</strong>: Serat halus, rendah lemak, sangat empuk.",
+                    "🧄 <strong>Bawang Putih & Rosemary</strong>: Penambah aromatik saat basting.",
+                    "🧈 <strong>Unsalted Butter (Mentega)</strong>: Memberikan kilau gurih di akhir masak."
+                ],
+                steps: [
+                    { desc: "<strong>Tahap 1: Persiapan</strong> - Keringkan permukaan daging sapi kering dengan tisu agar proses karamelisasi optimal.", checked: true },
+                    { desc: "<strong>Tahap 2: Sauteeing / Searing</strong> - Panaskan wajan besi col dengan sedikit minyak sampai berasap tipis.", checked: false },
+                    { desc: "<strong>Tahap 3: Grilling / Pan Searing</strong> - Panggang daging selama 3 menit di setiap sisi tanpa banyak diaduk.", checked: false },
+                    { desc: "<strong>Tahap 4: Basting (Sauteeing lanjutan)</strong> - Masukkan mentega dan herba, siramkan mentega cair ke atas steak.", checked: false }
+                ]
+            },
+            soup: {
+                title: "Creamy Wild Mushroom Soup",
+                badge: "Soup",
+                ingredients: [
+                    "🍄 <strong>Jamur Champignon & Portobello</strong>: Mengandung rasa umami alami tinggi.",
+                    "🥛 <strong>Heavy Cream & Milk</strong>: Pembentuk tekstur lembut gurih khas kontinental.",
+                    "🧅 <strong>Mirepoix (Bawang bombai & seledri)</strong>: Bumbu dasar sup barat."
+                ],
+                steps: [
+                    { desc: "<strong>Tahap 1: Sauteeing</strong> - Tumis mirepoix dan irisan jamur segar dengan mentega sampai layu harum.", checked: true },
+                    { desc: "<strong>Tahap 2: Boiling</strong> - Tambahkan kaldu ayam, didihkan perlahan untuk menyatukan ekstrak rasa.", checked: false },
+                    { desc: "<strong>Tahap 3: Blending</strong> - Haluskan sup dengan blender hingga bertekstur kental beludru.", checked: false },
+                    { desc: "<strong>Tahap 4: Creaming</strong> - Tuangkan krim kental segar sambil diaduk pelan dalam api kecil.", checked: false }
+                ]
+            },
+            croissant: {
+                title: "Crispy Butter Croissant",
+                badge: "Patisserie",
+                ingredients: [
+                    "🌾 <strong>Adonan Tepung Protein Tinggi</strong>: Pembentuk kerangka gluten elastis.",
+                    "🧈 <strong>Korsvet / Butter Sheet</strong>: Mentega khusus pembentuk layer renyah laminasi.",
+                    "🧬 <strong>Yeast (Ragi)</strong>: Agen biologi untuk mengembangkan adonan."
+                ],
+                steps: [
+                    { desc: "<strong>Tahap 1: Fermenting</strong> - Diamkan adonan dasar ragi di lemari pendingin agar mengembang lambat dan gluten rileks.", checked: true },
+                    { desc: "<strong>Tahap 2: Laminasi</strong> - Gilas adonan bersama mentega berlapis-lapis untuk menghasilkan lapisan laminasi.", checked: false },
+                    { desc: "<strong>Tahap 3: Proofing</strong> - Istirahatkan adonan yang sudah dibentuk pada suhu 28°C agar mengembang gembung.", checked: false },
+                    { desc: "<strong>Tahap 4: Roasting / Baking</strong> - Panggang dalam oven bersuhu 190°C hingga mengembang renyah cokelat keemasan.", checked: false }
+                ]
+            }
+        };
+
+        const simulationRules = {
+            'beef-grilling': { dish: 'Grilled Ribeye Steak', score: 100, doneness: 'Perfect Medium', texture: 'Juicy & Tender', desc: 'Suhu tinggi memicu karamelisasi reaksi Maillard yang sangat sempurna luar biasa.', stars: 5 },
+            'beef-braising': { dish: 'Beef Bourguignon', score: 100, doneness: 'Melt-in-mouth', texture: 'Sangat Lembut', desc: 'Kolagen keras meleleh menjadi gelatin berkat pemanasan basah lambat.', stars: 5 },
+            'beef-boiling': { dish: 'Rebusan Daging Sup', score: 70, doneness: 'Well-done', texture: 'Agak Keras/Padat', desc: 'Direbus langsung tanpa browning membuat rasa kaldu gurih namun daging agak sepah.', stars: 3 },
+            'beef-frying': { dish: 'Chicken Fried Steak Style', score: 60, doneness: 'Kering', texture: 'Sangat Liat', desc: 'Daging has yang digoreng kering tanpa pelindung tepung tebal menjadi kehilangan kelembapan dalamnya.', stars: 2 },
+            'beef-steaming': { dish: 'Steamed Beef Slice', score: 50, doneness: 'Pucat', texture: 'Kenyal Basah', desc: 'Teknik kukus jarang digunakan untuk potongan daging tebal kontinental karena gagal memicu reaksi browning aroma karamel.', stars: 2 },
+            'beef-curing': { dish: 'Classic Beef Bresaola', score: 95, doneness: 'Terpreservasi', texture: 'Padat & Kenyal', desc: 'Proses curing garam mengawetkan daging secara alami dengan warna kemerahan yang pekat eksotis.', stars: 5 },
+            'beef-roasting': { dish: 'Classic Roast Beef Tenderloin', score: 95, doneness: 'Empuk Merata', texture: 'Empuk Merata', desc: 'Suhu oven yang kering mematangkan daging secara merata dengan aroma gurih panggangan.', stars: 5 },
+            'beef-sauteeing': { dish: 'Sautéed Beef Strips', score: 90, doneness: 'Matang Cepat', texture: 'Kenyal Juicy', desc: 'Potongan tipis berpadu mentega menghasilkan rasa gurih dalam waktu singkat.', stars: 4 },
+            'beef-fermenting': { dish: 'Salami Terfermentasi', score: 85, doneness: 'Asam Gurih', texture: 'Padat Kering', desc: 'Bakteri asam laktat berhasil difermentasi menciptakan rasa asam khas charcuterie.', stars: 4 },
+
+            'potato-boiling': { dish: 'Mashed Potato Base', score: 100, doneness: 'Sempurna', texture: 'Sangat Pulen', desc: 'Pati kentang mengembang menyerap air merebus, sangat pas untuk dihancurkan bersama mentega.', stars: 5 },
+            'potato-frying': { dish: 'Classic French Fries', score: 100, doneness: 'Kuning Keemasan', texture: 'Luar Crispy, Dalam Lembut', desc: 'Suhu minyak tinggi membuat air menguap cepat dari kulit luar kentang, menghasilkan kerenyahan maksimal.', stars: 5 },
+            'potato-roasting': { dish: 'Crispy Roasted Potatoes', score: 95, doneness: 'Renyah Berkulit', texture: 'Sangat Pulen', desc: 'Oven panas mengeringkan bagian luar dan memanggang bagian dalam kentang secara perlahan.', stars: 5 },
+            'potato-sauteeing': { dish: 'Potato Lyonnaise', score: 85, doneness: 'Matang Kecokelatan', texture: 'Empuk Agak Renyah', desc: 'Sangat cocok dipadukan dengan mentega cair dan bawang bombay cincang.', stars: 4 },
+            'potato-steaming': { dish: 'Kukus Kentang Diet', score: 80, doneness: 'Matang Lembap', texture: 'Pulen Padat', desc: 'Nutrisi kentang terjaga penuh namun tidak memiliki rasa gurih panggangan.', stars: 4 },
+            'potato-grilling': { dish: 'Grilled Baked Potato', score: 75, doneness: 'Gosong Kulit', texture: 'Pulen Tebal', desc: 'Bara api langsung membuat kulit kentang menghitam namun bagian tengah membutuhkan waktu ekstra untuk matang.', stars: 3 },
+            'potato-braising': { dish: 'Braised Potato Fondant', score: 90, doneness: 'Sangat Meresap', texture: 'Sangat Lembut', desc: 'Searing mentega dilanjutkan masak dalam kaldu membuat kentang kaya rasa sup kontinental.', stars: 4 },
+            'potato-fermenting': { dish: 'Adonan Kentang Fermentasi', score: 65, doneness: 'Slightly Sour', texture: 'Sedikit Bergas', desc: 'Pati kentang dapat difermentasikan untuk ragi pembuat donat kentang kontinental.', stars: 3 },
+            'potato-curing': { dish: 'Kentang Asin Pengawetan', score: 40, doneness: 'Keriput Keras', texture: 'Sangat Asin', desc: 'Curing kentang mentah dengan garam pekat membuatnya kehilangan cairan berlebih dan menjadi liat tidak enak.', stars: 1 },
+
+            'fish-steaming': { dish: 'Steamed Fish in Parchment', score: 100, doneness: 'Sangat Lembap', texture: 'Sangat Lembut, Flaky', desc: 'Teknik mengukus mengunci kelembapan ikan tanpa merusak serat daging ikan yang rapuh.', stars: 5 },
+            'fish-grilling': { dish: 'Grilled Sea Bass Fillet', score: 95, doneness: 'Flaky Golden', texture: 'Lembut dengan Smokey Crust', desc: 'Suhu bara api tinggi memanggang kulit ikan menjadi renyah harum alami.', stars: 5 },
+            'fish-frying': { dish: 'English Fish & Chips', score: 100, doneness: 'Crispy Gold', texture: 'Sangat Crunchy Luar', desc: 'Balutan tepung berpadu minyak panas menjaga kelembapan ikan di dalam.', stars: 5 },
+            'fish-curing': { dish: 'Scandinavian Gravlax Salmon', score: 100, doneness: 'Raw-Cured', texture: 'Kenyal Halus Mengkilap', desc: 'Campuran garam, gula, dan adas dill menarik cairan ikan menciptakan hidangan dingin legendaris.', stars: 5 },
+            'fish-sauteeing': { dish: 'Pan-Seared Salmon', score: 95, doneness: 'Medium-Well', texture: 'Sangat Lembut', desc: 'Mentega panas memberikan rasa gurih instan pada kulit salmon yang renyah.', stars: 5 },
+            'fish-boiling': { dish: 'Poached Fish Fillet', score: 85, doneness: 'Lembap', texture: 'Mudah Hancur', desc: 'Merebus langsung dengan gelembung kuat bisa merusak struktur daging ikan. Disarankan poaching (api kecil di bawah mendidih).', stars: 4 },
+            'fish-roasting': { dish: 'Oven-Baked Cod Fish', score: 90, doneness: 'Matang Merata', texture: 'Lembut Basah', desc: 'Suhu oven yang terkontrol dengan lumuran mentega menjaga ikan tidak mengering kering.', stars: 4 },
+            'fish-braising': { dish: 'Braised Fish in Tomato Sauce', score: 85, doneness: 'Meresap Gurih', texture: 'Sangat Lembut', desc: 'Saus tomat mendidih pelan mematangkan ikan dengan meresapkan asam segar.', stars: 4 },
+            'fish-fermenting': { dish: 'Anchovy Style Ferment', score: 70, doneness: 'Sangat Asin', texture: 'Hancur Lembek', desc: 'Fermentasi ikan dengan garam menghasilkan rasa umami pekat, namun kurang ramah dikonsumsi langsung.', stars: 3 },
+
+            'dough-roasting': { dish: 'Puff Pastry Croissant', score: 100, doneness: 'Golden Crust Layered', texture: 'Sangat Renyah, Berongga', desc: 'Panas oven membuat uap air dalam adonan mentega mendorong lapisan naik maksimal.', stars: 5 },
+            'dough-fermenting': { dish: 'Ragi Aktif Sourdough', score: 100, doneness: 'Sempurna', texture: 'Mengembang Ringan', desc: 'Fermentasi ragi memproduksi gas karbon dioksida yang merenggangkan gluten adonan roti.', stars: 5 },
+            'dough-frying': { dish: 'Classic Continental Beignet', score: 85, doneness: 'Golden Brown', texture: 'Crispy & Airy', desc: 'Adonan digoreng mengembang cepat, disajikan hangat dengan taburan gula halus.', stars: 4 },
+            'dough-steaming': { dish: 'Kukus Roti Gagal Layer', score: 30, doneness: 'Pucat Keriput', texture: 'Bantat & Basah', desc: 'Kukusan membuat lapisan mentega meleleh berantakan dan adonan menjadi liat basah.', stars: 1 },
+            'dough-boiling': { dish: 'Gnocchi Mentah Rebus', score: 75, doneness: 'Kenyal', texture: 'Kenyal Padat', desc: 'Hanya adonan kentang tepung tertentu yang mengambang jika direbus, adonan ragi roti biasa akan hancur.', stars: 3 },
+            'dough-grilling': { dish: 'Flatbread on Grill', score: 80, doneness: 'Sedikit Gosong', texture: 'Kenyal Kering', desc: 'Adonan dipanggang langsung di atas bara memberikan bintik cokelat eksotis.', stars: 4 },
+            'dough-braising': { dish: 'Dumpling Stewed', score: 50, doneness: 'Lembek', texture: 'Bantat Lembek', desc: 'Adonan yang direbus perlahan dalam saus akan kehilangan strukturnya kecuali adonan pangsit basah.', stars: 2 },
+            'dough-curing': { dish: 'Adonan Garam Rusak', score: 10, doneness: 'Gagal Total', texture: 'Keras Batu', desc: 'Adonan ditaburi garam kering pekat akan membunuh ragi dan menyerap seluruh cairan elastis.', stars: 1 },
+            'dough-sauteeing': { dish: 'Pan-Fried Flat Dough', score: 70, doneness: 'Setengah Matang', texture: 'Liat', desc: 'Menumis adonan roti tebal di wajan tanpa penutup membuat bagian dalam kurang matang.', stars: 3 },
+
+            'vegetables-steaming': { dish: 'Steamed Asparagus & Broccoli', score: 100, doneness: 'Hijau Alami', texture: 'Al Dente (Renyah Lembut)', desc: 'Mengukus mencegah zat gizi mikro larut dan menjaga struktur sel sayuran tetap tegak.', stars: 5 },
+            'vegetables-sauteeing': { dish: 'Sautéed Garlic Greens', score: 100, doneness: 'Glossy Hijau', texture: 'Crispy & Fresh', desc: 'Minyak zaitun panas melarutkan vitamin larut lemak dan mempertahankan rasa renyah manis alami.', stars: 5 },
+            'vegetables-boiling': { dish: 'Boiled Vegetable Medley', score: 75, doneness: 'Agak Pucat', texture: 'Lembek/Basah', desc: 'Rebusan terlalu lama merusak klorofil sayuran hijau dan melarutkan vitamin C ke dalam air.', stars: 3 },
+            'vegetables-roasting': { dish: 'Roasted Root Vegetables', score: 95, doneness: 'Karamel Manis', texture: 'Empuk Berkulit', desc: 'Suhu oven memicu konsentrasi gula alami dalam sayuran wortel/bit terkondensasi luar biasa.', stars: 5 },
+            'vegetables-braising': { dish: 'Braised Red Cabbage', score: 90, doneness: 'Sangat Meresap', texture: 'Sangat Empuk', desc: 'Kubis merah dimasak lambat dengan cuka apel menghasilkan hidangan pendamping steak yang sangat gurih.', stars: 5 },
+            'vegetables-frying': { dish: 'Crispy Tempura / Onion Rings', score: 85, doneness: 'Kuning Garing', texture: 'Sangat Garing', desc: 'Sangat populer di bar kontinental sebagai hidangan pembuka renyah berlemak.', stars: 4 },
+            'vegetables-grilling': { dish: 'Grilled Zucchini & Paprika', score: 95, doneness: 'Garis Gosong Manis', texture: 'Renyah Lembut', desc: 'Panas bara api mengkaramelisasi gula alami permukaan sayuran dengan sangat baik.', stars: 5 },
+            'vegetables-fermenting': { dish: 'Sauerkraut (Kol Asam Jerman)', score: 100, doneness: 'Fermented Tart', texture: 'Renyah Asam', desc: 'Fermentasi laktat alami pada kubis menghasilkan asam organik berlimpah dan probiotik sehat.', stars: 5 },
+            'vegetables-curing': { dish: 'Manisan / Acar Kering Garam', score: 80, doneness: 'Asin Kecut', texture: 'Sangat Garing Keriput', desc: 'Proses curing air garam menjaga kerenyahan serat seluler sayuran untuk masa simpan lama.', stars: 4 },
+
+            'milk-fermenting': { dish: 'Classic Yogurt / Cheese Curd', score: 100, doneness: 'Koagulasi Sempurna', texture: 'Kental Lembut / Padat', desc: 'Bakteri Lactobacillus berhasil memfermentasi laktosa susu menjadi asam laktat pembentuk dadih yogurt.', stars: 5 },
+            'milk-boiling': { dish: 'Hot Scalded Milk', score: 80, doneness: 'Mendidih Kulit Atas', texture: 'Cair Berbusa', desc: 'Merebus susu langsung tanpa diaduk cepat memicu pembentukan membran protein atas wajan dan rentan gosong bawah.', stars: 3 },
+            'milk-roasting': { dish: 'Baked Milk Pudding', score: 90, doneness: 'Set Sempurna', texture: 'Sutra Lembut', desc: 'Suhu oven konstan mematangkan protein susu bercampur telur secara perlahan (custard).', stars: 5 },
+            'milk-steaming': { dish: 'Steamed Milk Custard', score: 90, doneness: 'Lembut Basah', texture: 'Puding Sangat Halus', desc: 'Uap panas mengondensasi protein susu dengan lembut menghasilkan tekstur puding mulus tanpa rongga.', stars: 5 },
+            'milk-braising': { dish: 'Milk-Braised Pork / Chicken', score: 85, doneness: 'Sangat Empuk', texture: 'Sangat Lembut Saus', desc: 'Asam laktat susu membantu memecah serat daging selama proses braising menghasilkan saus krim kental.', stars: 4 },
+            'milk-frying': { dish: 'Fried Milk Bites (Susu Goreng)', score: 80, doneness: 'Crispy Shell', texture: 'Lumer Lembut', desc: 'Susu harus dibekukan dengan maizena terlebih dahulu baru dilapisi tepung sebelum digoreng panas.', stars: 4 },
+            'milk-grilling': { dish: 'Grilled Halloumi Cheese', score: 80, doneness: 'Garis Panggangan', texture: 'Kenyal Lumer', desc: 'Hanya jenis keju protein tinggi padat yang dapat dipanggang langsung di atas grill tanpa meleleh hilang.', stars: 4 },
+            'milk-curing': { dish: 'Susu Asin Padat Awet', score: 50, doneness: 'Menggumpal Rusak', texture: 'Kasar Kasar', desc: 'Garam murni tinggi langsung pada susu segar memicu pemisahan protein tidak stabil tanpa fermentasi rapi.', stars: 2 }
+        };
+
+        const quizQuestions = [
+            {
+                id: 1,
+                text: "Mengapa daging sapi potongan keras (seperti sengkel/chuck) sangat direkomendasikan diolah menggunakan teknik <strong>Braising</strong> dibandingkan Grilling?",
+                options: [
+                    { val: "A", text: "Braising memberikan warna luar yang lebih hitam garing." },
+                    { val: "B", text: "Suhu tinggi grilling menguapkan air terlalu cepat sehingga kolagen keras tidak sempat mencair empuk." },
+                    { val: "C", text: "Braising menggunakan minyak yang sangat banyak untuk melunakkan daging sapi." }
+                ],
+                correct: "B"
+            },
+            {
+                id: 2,
+                text: "Dalam teknik pembuatan <strong>Puff Pastry (Croissant)</strong>, proses manakah yang paling kritis memanfaatkan teknik <em>Fermenting</em>?",
+                options: [
+                    { val: "A", text: "Pengaktifan ragi (yeast) untuk memproduksi gas karbon dioksida pembentuk rongga udara." },
+                    { val: "B", text: "Pemanasan mentega korsvet agar meleleh menyatu dalam adonan kering." },
+                    { val: "C", text: "Pengeringan adonan luar agar kulit luar menjadi renyah mengkilat." }
+                ],
+                correct: "A"
+            },
+            {
+                id: 3,
+                text: "Keuntungan utama mengolah sayuran brokoli dengan teknik <strong>Steaming</strong> dibandingkan <strong>Boiling</strong> adalah...",
+                options: [
+                    { val: "A", text: "Steaming membuat warna sayuran brokoli menjadi kuning kecokelatan matang." },
+                    { val: "B", text: "Steaming mencegah larutnya vitamin larut air (seperti vitamin C) ke dalam media cairan perebus." },
+                    { val: "C", text: "Steaming menggunakan tekanan minyak tinggi untuk mempercepat durasi memasak." }
+                ],
+                correct: "B"
+            }
+        ];
+
+        // --- 2. SOUND ENGINE (WEB AUDIO API SYNTHESIS) ---
+        let audioCtx = null;
+        let soundEnabled = true;
+        let continuousSource = null;
+
+        function initAudioContext(enable) {
+            soundEnabled = enable;
+            
+            if (enable) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContextClass();
+                playBeep(600, 0.15, 0.15); // Success indicator
+                document.getElementById('sound-btn').innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+            } else {
+                document.getElementById('sound-btn').innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+            }
+        }
+
+        function toggleSound() {
+            if (!audioCtx) {
+                initAudioContext(true);
+                return;
+            }
+            soundEnabled = !soundEnabled;
+            if (soundEnabled) {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                document.getElementById('sound-btn').innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+                playBeep(600, 0.1, 0.1);
+            } else {
+                document.getElementById('sound-btn').innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+                stopContinuousSound();
+            }
+        }
+
+        function playBeep(frequency, duration, volume = 0.2) {
+            if (!soundEnabled || !audioCtx) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.value = frequency;
+                
+                gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.log("Audio failed to play", e);
+            }
+        }
+
+        function playChime(success = true) {
+            if (!soundEnabled || !audioCtx) return;
+            try {
+                const now = audioCtx.currentTime;
+                const notes = success ? [523.25, 659.25, 783.99, 1046.50] : [220, 180, 150]; // C Major Arpeggio vs Sad Fall
+                const times = success ? [0, 0.1, 0.2, 0.3] : [0, 0.15, 0.3];
+                const dur = success ? 0.3 : 0.4;
+
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.frequency.value = freq;
+                    osc.type = success ? 'triangle' : 'sawtooth';
+                    
+                    gain.gain.setValueAtTime(0.15, now + times[idx]);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + times[idx] + dur);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + times[idx]);
+                    osc.stop(now + times[idx] + dur);
+                });
+            } catch(e){}
+        }
+
+        function startContinuousSound(type) {
+            if (!soundEnabled || !audioCtx) return;
+            try {
+                stopContinuousSound();
+                
+                // Noise generation for sizzle/boil/steam
+                const bufferSize = audioCtx.sampleRate * 2; // 2 seconds
+                const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+                
+                const whiteNoise = audioCtx.createBufferSource();
+                whiteNoise.buffer = noiseBuffer;
+                whiteNoise.loop = true;
+
+                // Setup Filters
+                const filter = audioCtx.createBiquadFilter();
+                const gain = audioCtx.createGain();
+
+                if (type === 'sizzle' || type === 'frying' || type === 'sauteeing' || type === 'grilling') {
+                    // Sizzling is high-pass filtered white noise with minor modulations
+                    filter.type = 'highpass';
+                    filter.frequency.value = 4000;
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                } else if (type === 'boiling' || type === 'braising') {
+                    // Boiling is low-pass filtered rumble with a bubble oscillator
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 300;
+                    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+
+                    // Add a periodic bubble "plop" oscillator
+                    createBubbleGenerator();
+                } else if (type === 'steaming') {
+                    // Steaming is clean high-mid pass white noise
+                    filter.type = 'bandpass';
+                    filter.frequency.value = 2500;
+                    filter.Q.value = 1.0;
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                } else {
+                    // Low hum for baking
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 150;
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                }
+
+                whiteNoise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                whiteNoise.start();
+                continuousSource = {
+                    node: whiteNoise,
+                    gainNode: gain,
+                    type: type
+                };
+            } catch(e){}
+        }
+
+        function createBubbleGenerator() {
+            if (!soundEnabled || !audioCtx || !continuousSource) return;
+            let bubbleTimer = setInterval(() => {
+                if (!continuousSource || (continuousSource.type !== 'boiling' && continuousSource.type !== 'braising')) {
+                    clearInterval(bubbleTimer);
+                    return;
+                }
+                // Quick rising pitch pop
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(80 + Math.random()*50, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(300 + Math.random()*100, audioCtx.currentTime + 0.15);
+                    
+                    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.15);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.15);
+                } catch(e){}
+            }, 250);
+        }
+
+        function stopContinuousSound() {
+            if (continuousSource) {
+                try {
+                    continuousSource.node.stop();
+                } catch(e){}
+                continuousSource = null;
+            }
+        }
+
+
+        // --- 3. STATE MANAGEMENT & LAB CONTROL ---
+        let currentTab = 'teori';
+        let selectedTechniqueIndex = 0;
+        let selectedRecipeKey = 'steak';
+        let currentRecipeStepIdx = 0;
+
+        // Simulator State
+        let simIngredient = null;
+        let simTechnique = null;
+        let simTemp = 100;
+        let simTime = 10;
+        let isCooking = false;
+        
+        // Jurnal Logs
+        let logs = [];
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('nav button').forEach(el => {
+                el.classList.remove('bg-amber-500', 'text-slate-950', 'shadow-md');
+                el.classList.add('text-slate-400', 'hover:text-slate-200');
+            });
+
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.remove('text-slate-400', 'hover:text-slate-200');
+            activeBtn.classList.add('bg-amber-500', 'text-slate-950', 'shadow-md');
+
+            playBeep(500, 0.08, 0.15);
+
+            // Trigger dynamic load of tabs if needed
+            if (tabId === 'teori') renderTheory();
+            if (tabId === 'prosedur') loadRecipe();
+            if (tabId === 'simulasi') renderSimulatorUI();
+            if (tabId === 'lkpd') renderLKPD();
+        }
+
+        function resetLab() {
+            playChime(false);
+            
+            // Reset tab
+            switchTab('teori');
+            selectedTechniqueIndex = 0;
+            renderTheory();
+
+            // Reset recipes
+            selectedRecipeKey = 'steak';
+            currentRecipeStepIdx = 0;
+            document.getElementById('recipe-select').value = 'steak';
+            loadRecipe();
+
+            // Reset Simulator State
+            simIngredient = null;
+            simTechnique = null;
+            simTemp = 100;
+            simTime = 10;
+            isCooking = false;
+            stopContinuousSound();
+            renderSimulatorUI();
+            closeResult();
+
+            // Reset LKPD
+            logs = [];
+            document.getElementById('student-name').value = "Siswa Berbakat";
+            document.getElementById('student-class').value = "XI - Kuliner 1";
+            
+            // Reset Quiz Questions to empty
+            renderLKPD();
+            
+            // Show reset notification in UI
+            showStatusMessage("Dapur Lab Maya berhasil di-reset ulang!", "info");
+        }
+
+        function showStatusMessage(message, type = "info") {
+            const kitchenStatus = document.getElementById('kitchen-status');
+            if (kitchenStatus) {
+                kitchenStatus.innerText = message;
+                kitchenStatus.className = type === 'success' ? 'text-green-400 font-bold' : type === 'error' ? 'text-red-400 font-bold' : 'text-amber-400 font-bold';
+            }
+        }
+
+
+        // --- 4. TEORI RENDERING ---
+        function renderTheory() {
+            const listContainer = document.getElementById('technique-list');
+            listContainer.innerHTML = '';
+            
+            techniques.forEach((tech, idx) => {
+                const isActive = idx === selectedTechniqueIndex;
+                const itemBtn = document.createElement('button');
+                itemBtn.className = `w-full text-left p-2.5 rounded-lg border text-xs font-semibold flex items-center justify-between transition-all duration-150 ${isActive ? 'bg-slate-800 border-amber-500/50 text-slate-100 shadow-lg' : 'bg-slate-950/40 border-slate-800/60 text-slate-400 hover:bg-slate-900/60'}`;
+                itemBtn.onclick = () => {
+                    selectedTechniqueIndex = idx;
+                    renderTheory();
+                    playBeep(440 + (idx * 30), 0.08, 0.1);
+                };
+                itemBtn.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="${tech.color} text-sm w-5 text-center"><i class="${tech.icon}"></i></span>
+                        <span>${tech.name}</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i>
+                `;
+                listContainer.appendChild(itemBtn);
+            });
+
+            // Fill Detail Panel
+            const tech = techniques[selectedTechniqueIndex];
+            const detailContainer = document.getElementById('technique-detail');
+            
+            // Constructing best ingredients list tags
+            const tags = tech.bestIngredients.map(ing => `<span class="bg-slate-950 text-slate-300 border border-slate-800 px-2 py-0.5 rounded text-[11px] font-medium">${ing}</span>`).join(' ');
+
+            detailContainer.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 border-b border-slate-800/80 pb-3">
+                        <span class="text-3xl ${tech.color} bg-slate-950 p-2.5 rounded-xl border border-slate-800"><i class="${tech.icon}"></i></span>
+                        <div>
+                            <h2 class="text-lg font-black text-slate-100 tracking-tight">${tech.name}</h2>
+                            <p class="text-xs text-amber-500/80 font-bold">Teknik Olahan Kuliner Kontinental</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <div>
+                                <h4 class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Definisi Teknik</h4>
+                                <p class="text-xs text-slate-200 leading-relaxed mt-1">${tech.desc}</p>
+                            </div>
+                            <div>
+                                <h4 class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Karakteristik Fisik</h4>
+                                <p class="text-xs text-slate-300 leading-relaxed mt-1">${tech.char}</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3 bg-slate-950/40 p-3 rounded-lg border border-slate-800/60">
+                            <div>
+                                <h4 class="text-[10px] uppercase font-bold text-amber-500 tracking-wider">Aturan Utama (Rule of Thumb)</h4>
+                                <p class="text-xs text-slate-300 leading-relaxed mt-1">${tech.rules}</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-xs pt-1">
+                                <div>
+                                    <span class="text-slate-500 text-[10px] block">Suhu Ideal</span>
+                                    <strong class="text-amber-400">${tech.idealTemp}</strong>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 text-[10px] block">Durasi Lazim</span>
+                                    <strong class="text-amber-400">${tech.idealTime}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-800/80 pt-3 flex items-center justify-between">
+                    <div>
+                        <h4 class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1.5">Bahan Baku Sangat Direkomendasikan</h4>
+                        <div class="flex gap-1.5">${tags}</div>
+                    </div>
+                    <button onclick="tryTechniqueInSim('${tech.id}')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold py-2 px-4 rounded-lg transition-all flex items-center gap-1.5 shadow-lg shadow-amber-500/10">
+                        <i class="fa-solid fa-flask-vial"></i> Uji Teknik di Simulasi
+                    </button>
+                </div>
+            `;
+        }
+
+        function tryTechniqueInSim(techId) {
+            // Find matched ingredient first to auto-select
+            const techObj = techniques.find(t => t.id === techId);
+            let targetIng = 'beef';
+            if (techId === 'fermenting') targetIng = 'milk';
+            if (techId === 'boiling') targetIng = 'potato';
+            if (techId === 'steaming') targetIng = 'vegetables';
+            
+            simIngredient = targetIng;
+            simTechnique = techId;
+            
+            // Set ideal sliders based on definition
+            const tempVal = parseInt(techObj.idealTemp);
+            simTemp = isNaN(tempVal) ? 100 : tempVal;
+            simTime = techId === 'fermenting' ? 24 : 15; // default reasonable times
+
+            switchTab('simulasi');
+        }
+
+
+        // --- 5. PROSEDUR RESEP ---
+        function loadRecipe() {
+            selectedRecipeKey = document.getElementById('recipe-select').value;
+            const rcp = recipes[selectedRecipeKey];
+            currentRecipeStepIdx = 0;
+
+            document.getElementById('recipe-title').innerText = rcp.title;
+            
+            // Load ingredients text list
+            const ingContainer = document.getElementById('recipe-ingredients');
+            ingContainer.innerHTML = rcp.ingredients.map(ing => `
+                <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/60 text-slate-300 leading-normal">
+                    ${ing}
+                </div>
+            `).join('');
+
+            updateRecipeStepView();
+        }
+
+        function updateRecipeStepView() {
+            const rcp = recipes[selectedRecipeKey];
+            const stepContainer = document.getElementById('recipe-steps');
+            stepContainer.innerHTML = '';
+
+            rcp.steps.forEach((step, idx) => {
+                const isCurrent = idx === currentRecipeStepIdx;
+                const isPast = idx < currentRecipeStepIdx;
+                
+                const stepCard = document.createElement('div');
+                stepCard.className = `flex items-start gap-3 p-3 rounded-lg border transition-all duration-200 ${isCurrent ? 'bg-slate-800 border-amber-500/50 shadow-md' : isPast ? 'bg-slate-900/30 border-slate-800/40 opacity-60' : 'bg-slate-950/20 border-slate-900/40 opacity-40'}`;
+                
+                stepCard.innerHTML = `
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${isCurrent ? 'bg-amber-500 text-slate-950' : isPast ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-slate-800 text-slate-500'}">
+                        ${isPast ? '<i class="fa-solid fa-check"></i>' : idx + 1}
+                    </div>
+                    <p class="text-xs text-slate-200 mt-0.5">${step.desc}</p>
+                `;
+                stepContainer.appendChild(stepCard);
+            });
+
+            // Update footer navigation button states
+            document.getElementById('prev-step-btn').disabled = currentRecipeStepIdx === 0;
+            document.getElementById('prev-step-btn').className = currentRecipeStepIdx === 0 ? 'bg-slate-900 text-slate-600 text-xs font-semibold py-1.5 px-3 rounded-lg cursor-not-allowed' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-1.5 px-3 rounded-lg transition-colors';
+            
+            const isLast = currentRecipeStepIdx === rcp.steps.length - 1;
+            document.getElementById('next-step-btn').innerHTML = isLast ? '<i class="fa-solid fa-cookie-bite"></i> Selesai Mempelajari' : 'Lanjut Langkah';
+        }
+
+        function recipeStep(dir) {
+            const rcp = recipes[selectedRecipeKey];
+            if (dir === 1) {
+                if (currentRecipeStepIdx < rcp.steps.length - 1) {
+                    currentRecipeStepIdx++;
+                    updateRecipeStepView();
+                    playBeep(400 + (currentRecipeStepIdx * 50), 0.1, 0.15);
+                } else {
+                    // Completed, jump to simulator
+                    playChime(true);
+                    switchTab('simulasi');
+                    showStatusMessage(`Mari simulasikan teknik dari resep ${rcp.title}!`, "success");
+                }
+            } else {
+                if (currentRecipeStepIdx > 0) {
+                    currentRecipeStepIdx--;
+                    updateRecipeStepView();
+                    playBeep(300 + (currentRecipeStepIdx * 50), 0.1, 0.15);
+                }
+            }
+        }
+
+
+        // --- 6. SIMULATOR COOKING SANDBOX ---
+        function selectIngredient(ingId) {
+            if (isCooking) return;
+            simIngredient = ingId;
+            
+            // Auto suggest sensible sliders based on standard
+            if (ingId === 'beef') { simTemp = 220; simTime = 6; }
+            if (ingId === 'potato') { simTemp = 100; simTime = 20; }
+            if (ingId === 'fish') { simTemp = 100; simTime = 10; }
+            if (ingId === 'dough') { simTemp = 180; simTime = 25; }
+            if (ingId === 'vegetables') { simTemp = 100; simTime = 4; }
+            if (ingId === 'milk') { simTemp = 38; simTime = 24; } // Days/Hours implied
+
+            playBeep(500, 0.08, 0.15);
+            renderSimulatorUI();
+        }
+
+        // --- SPLASH SCREEN LOADING & DISMISS LOGIC ---
+        function runSplashLoading() {
+            const progressBar = document.getElementById('loading-progress-bar');
+            const percentageText = document.getElementById('loading-percentage');
+            const statusText = document.getElementById('loading-status-text');
+
+            const statusStages = [
+                "Mengunduh modul aset dapur...",
+                "Menyiapkan bahan & bumbu kontinental...",
+                "Mensterilkan peralatan oven & wajan...",
+                "Menyetel parameter termal simulasi...",
+                "Siap menyajikan modul interaktif!"
+            ];
+
+            let progress = 0;
+            const duration = 1800; // 1.8 seconds loading
+            const intervalTime = 40;
+            const steps = duration / intervalTime;
+            const increment = 100 / steps;
+
+            const loadTimer = setInterval(() => {
+                progress += increment;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(loadTimer);
+                    
+                    // Reveal Start Button
+                    progressBar.style.width = '100%';
+                    percentageText.innerText = '100%';
+                    statusText.innerText = "Selesai Memuat!";
+                    statusText.className = "font-bold text-green-400";
+
+                    // Play tiny notify beep
+                    setTimeout(() => {
+                        playBeep(880, 0.12, 0.1);
+                        // Fade out loading, Fade in start button
+                        document.getElementById('loading-container').classList.add('hidden');
+                        const startContainer = document.getElementById('start-container');
+                        startContainer.classList.remove('hidden');
+                        setTimeout(() => {
+                            startContainer.classList.remove('scale-95', 'opacity-0');
+                            startContainer.classList.add('scale-100', 'opacity-100');
+                        }, 50);
+                    }, 300);
+                } else {
+                    progressBar.style.width = `${Math.floor(progress)}%`;
+                    percentageText.innerText = `${Math.floor(progress)}%`;
+                    
+                    // Shift text comments dynamically
+                    const stageIndex = Math.floor((progress / 100) * statusStages.length);
+                    statusText.innerText = statusStages[stageIndex] || "Memuat...";
+                }
+            }, intervalTime);
+        }
+
+        function dismissSplash() {
+            // Unlock audio safely on first real human gesture
+            initAudioContext(true);
+            
+            // Trigger beautiful chime
+            playChime(true);
+
+            // Hide Splash with beautiful transition
+            const splash = document.getElementById('splash-screen');
+            splash.classList.add('opacity-0', 'pointer-events-none', 'scale-105');
+            
+            // Trigger regular start up elements
+            renderTheory();
+        }
+
+        function selectSimTechnique(techId) {
+            if (isCooking) return;
+            simTechnique = techId;
+
+            // Auto adapt temp to technique default logic
+            const techObj = techniques.find(t => t.id === techId);
+            const numTemp = parseInt(techObj.idealTemp);
+            if (!isNaN(numTemp)) {
+                simTemp = numTemp;
+            }
+
+            playBeep(550, 0.08, 0.15);
+            renderSimulatorUI();
+        }
+
+        function updateSliders() {
+            simTemp = document.getElementById('temp-slider').value;
+            simTime = document.getElementById('time-slider').value;
+
+            // Update readout texts
+            document.getElementById('temp-val').innerText = `${simTemp}°C`;
+            const unit = (simTechnique === 'fermenting' || simTechnique === 'curing') ? 'hari' : 'menit';
+            document.getElementById('time-val').innerText = `${simTime} ${unit}`;
+        }
+
+        function renderSimulatorUI() {
+            // Update ingredient button styles
+            document.querySelectorAll('.ingredient-btn').forEach(btn => {
+                const id = btn.id.replace('ing-', '');
+                if (id === simIngredient) {
+                    btn.className = 'ingredient-btn bg-amber-500/20 border-2 border-amber-500 p-2 rounded-lg flex flex-col items-center justify-center text-slate-100 transition-all scale-105';
+                } else {
+                    btn.className = 'ingredient-btn bg-slate-950 border border-slate-800 hover:border-slate-700 p-2 rounded-lg flex flex-col items-center justify-center transition-all';
+                }
+            });
+
+            // Update technique button styles
+            document.querySelectorAll('.tech-btn').forEach(btn => {
+                const id = btn.id.replace('tech-', '');
+                if (id === simTechnique) {
+                    btn.className = 'tech-btn bg-amber-500 text-slate-950 border border-amber-500 text-[10px] font-bold py-1.5 rounded transition-all scale-105';
+                } else {
+                    btn.className = 'tech-btn bg-slate-950 border border-slate-800 text-[10px] font-medium py-1.5 rounded text-slate-400 hover:text-slate-200 transition-all';
+                }
+            });
+
+            // Update readouts
+            const rawIngredientsMap = { beef: '🥩 Daging Sapi', potato: '🥔 Kentang', fish: '🐟 Ikan Fillet', dough: '🥐 Adonan Pastry', vegetables: '🥦 Sayuran', milk: '🥛 Susu Cair' };
+            const techObj = simTechnique ? techniques.find(t => t.id === simTechnique) : null;
+
+            document.getElementById('readout-ing').innerText = simIngredient ? rawIngredientsMap[simIngredient] : 'Belum dipilih';
+            document.getElementById('readout-tech').innerText = techObj ? techObj.name : 'Belum dipilih';
+
+            // Sync Slider elements
+            document.getElementById('temp-slider').value = simTemp;
+            document.getElementById('time-slider').value = simTime;
+            updateSliders();
+
+            // Match score calculation indicator
+            const matchInd = document.getElementById('match-indicator');
+            if (simIngredient && simTechnique) {
+                const matchKey = `${simIngredient}-${simTechnique}`;
+                const matchObj = simulationRules[matchKey];
+                if (matchObj) {
+                    if (matchObj.score >= 90) {
+                        matchInd.innerText = "Cocok Sekali";
+                        matchInd.className = "px-2 py-0.5 rounded font-bold bg-green-500/10 text-green-400 border border-green-500/20";
+                    } else if (matchObj.score >= 70) {
+                        matchInd.innerText = "Sesuai";
+                        matchInd.className = "px-2 py-0.5 rounded font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20";
+                    } else {
+                        matchInd.innerText = "Kurang Cocok";
+                        matchInd.className = "px-2 py-0.5 rounded font-bold bg-red-500/10 text-red-400 border border-red-500/20";
+                    }
+                } else {
+                    matchInd.innerText = "Tidak Cocok";
+                    matchInd.className = "px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400";
+                }
+            } else {
+                matchInd.innerText = "N/A";
+                matchInd.className = "px-2 py-0.5 rounded font-bold bg-slate-950 text-slate-600";
+            }
+
+            // Render correct appliance and food base SVG inside cooking-stage
+            renderCulinaryAppliance();
+        }
+
+        function renderCulinaryAppliance() {
+            const container = document.getElementById('stove-appliance');
+            const foodVisual = document.getElementById('food-visual');
+            const rawIcons = { beef: '🥩', potato: '🥔', fish: '🐟', dough: '🥐', vegetables: '🥦', milk: '🥛' };
+
+            // Render raw food icon inside
+            foodVisual.innerHTML = `<span class="text-4xl filter drop-shadow">${simIngredient ? rawIcons[simIngredient] : '❓'}</span>`;
+
+            if (!simTechnique) {
+                // Preparasi
+                container.innerHTML = `
+                    <svg class="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="10" y="75" width="80" height="10" rx="4" fill="#334155"/>
+                        <circle cx="50" cy="45" r="25" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                        <path d="M40 45 L60 45 M50 35 L50 55" stroke="#334155" stroke-width="2" stroke-linecap="round"/>
+                        <text x="50" y="93" fill="#64748b" font-size="6" font-weight="bold" text-anchor="middle">MEJA PREPARASI</text>
+                    </svg>
+                `;
+                return;
+            }
+
+            // Render specific cooking tool (Pot, Oven, Skillet, Steamer, Fermentor jars)
+            switch (simTechnique) {
+                case 'boiling':
+                case 'braising':
+                    // Panci Masak Sup
+                    container.innerHTML = `
+                        <svg class="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Cooker Base -->
+                            <rect x="25" y="75" width="50" height="8" rx="2" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                            <!-- Pot Body -->
+                            <rect x="30" y="35" width="40" height="36" rx="2" fill="#475569" stroke="#64748b" stroke-width="2"/>
+                            <!-- Handles -->
+                            <path d="M25 45 C20 45 20 53 25 53" stroke="#64748b" stroke-width="2" stroke-linecap="round" fill="none"/>
+                            <path d="M75 45 C80 45 80 53 75 53" stroke="#64748b" stroke-width="2" stroke-linecap="round" fill="none"/>
+                            <!-- Water line -->
+                            <rect x="32" y="48" width="36" height="21" fill="#38bdf8" fill-opacity="0.2"/>
+                        </svg>
+                    `;
+                    break;
+                case 'roasting':
+                    // Oven Premium
+                    container.innerHTML = `
+                        <svg class="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="20" y="25" width="60" height="55" rx="6" fill="#1e293b" stroke="#475569" stroke-width="3"/>
+                            <rect x="28" y="33" width="44" height="35" rx="3" fill="#020617" stroke="#334155" stroke-width="2"/>
+                            <!-- Glass Glow -->
+                            <rect x="32" y="37" width="36" height="27" fill="#f59e0b" fill-opacity="0.1"/>
+                            <!-- Knobs -->
+                            <circle cx="32" cy="73" r="2.5" fill="#e2e8f0"/>
+                            <circle cx="42" cy="73" r="2.5" fill="#e2e8f0"/>
+                        </svg>
+                    `;
+                    break;
+                case 'grilling':
+                    // Grill Grid / Arang
+                    container.innerHTML = `
+                        <svg class="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="20" y="70" width="60" height="15" rx="4" fill="#1e293b" stroke="#334155"/>
+                            <rect x="24" y="58" width="52" height="10" fill="#dc2626" fill-opacity="0.6"/>
+                            <line x1="22" y1="55" x2="78" y2="55" stroke="#94a3b8" stroke-width="2"/>
+                            <line x1="30" y1="55" x2="30" y2="68" stroke="#475569" stroke-width="1.5"/>
+                            <line x1="40" y1="55" x2="40" y2="68" stroke="#475569" stroke-width="1.5"/>
+                            <line x1="50" y1="55" x2="50" y2="68" stroke="#475569" stroke-width="1.5"/>
+                            <line x1="60" y1="55" x2="60" y2="68" stroke="#475569" stroke-width="1.5"/>
+                            <line x1="70" y1="55" x2="70" y2="68" stroke="#475569" stroke-width="1.5"/>
+                        </svg>
+                    `;
+                    break;
+                case 'frying':
+                case 'sauteeing':
+                    // Wajan Teflon Gagang
+                    container.innerHTML = `
+                        <svg class="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="45" cy="62" rx="25" ry="10" fill="#334155" stroke="#475569" stroke-width="2"/>
+                            <path d="M68 60 L88 42" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+                        </svg>
+                    `;
+                    break;
+                case 'steaming':
+                    // Dandang Mengukus Layer
+                    container.innerHTML = `
+                        <svg class="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="28" y="55" width="44" height="22" fill="#475569" stroke="#64748b" stroke-width="2"/>
+                            <rect x="28" y="34" width="44" height="20" fill="#475569" stroke="#64748b" stroke-width="2"/>
+                            <!-- Steamer Plate separator -->
+                            <line x1="28" y1="54" x2="72" y2="54" stroke="#94a3b8" stroke-width="2" stroke-dasharray="2 2"/>
+                            <!-- Lid -->
+                            <path d="M28 34 C28 24 72 24 72 34 Z" fill="#334155" stroke="#475569" stroke-width="2"/>
+                            <rect x="46" y="20" width="8" height="4" fill="#0f172a"/>
+                        </svg>
+                    `;
+                    break;
+                case 'fermenting':
+                    // Stoples kaca fermentasi steril
+                    container.innerHTML = `
+                        <svg class="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="32" y="32" width="36" height="46" rx="8" fill="#38bdf8" fill-opacity="0.08" stroke="#38bdf8" stroke-width="2"/>
+                            <rect x="40" y="24" width="20" height="8" rx="2" fill="#f43f5e" stroke="#fda4af" stroke-width="2"/>
+                        </svg>
+                    `;
+                    break;
+                case 'curing':
+                    // Papan kayu curing garam
+                    container.innerHTML = `
+                        <svg class="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="15" y="70" width="70" height="12" rx="2" fill="#78350f" stroke="#92400e" stroke-width="2"/>
+                            <!-- Salt layer dots -->
+                            <circle cx="30" cy="65" r="2" fill="#f8fafc"/>
+                            <circle cx="45" cy="67" r="2.5" fill="#f8fafc"/>
+                            <circle cx="60" cy="64" r="2" fill="#f8fafc"/>
+                            <circle cx="70" cy="66" r="3" fill="#f8fafc"/>
+                        </svg>
+                    `;
+                    break;
+            }
+        }
+
+        function generateParticles() {
+            const layer = document.getElementById('animation-layer');
+            layer.innerHTML = '';
+            if (!simTechnique) return;
+
+            if (simTechnique === 'boiling' || simTechnique === 'braising') {
+                // Bubbles rising
+                for (let i = 0; i < 15; i++) {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'bubble-active absolute w-2 h-2 bg-sky-200/40 rounded-full border border-white/50 pointer-events-none';
+                    bubble.style.left = `${35 + Math.random() * 30}%`;
+                    bubble.style.bottom = `${30 + Math.random() * 10}%`;
+                    bubble.style.animationDelay = `${Math.random() * 1.5}s`;
+                    layer.appendChild(bubble);
+                }
+            } else if (simTechnique === 'sauteeing' || simTechnique === 'frying' || simTechnique === 'grilling') {
+                // Smoke and sparks rising
+                for (let i = 0; i < 8; i++) {
+                    const smoke = document.createElement('div');
+                    smoke.className = 'smoke absolute bg-slate-400/20 rounded-full pointer-events-none blur-md';
+                    smoke.style.width = `${15 + Math.random()*15}px`;
+                    smoke.style.height = `${15 + Math.random()*15}px`;
+                    smoke.style.left = `${40 + Math.random() * 20}%`;
+                    smoke.style.bottom = `${35 + Math.random() * 10}%`;
+                    smoke.style.animationDelay = `${Math.random() * 1.2}s`;
+                    layer.appendChild(smoke);
+                }
+            } else if (simTechnique === 'steaming') {
+                // Heavier steam billowing
+                for (let i = 0; i < 12; i++) {
+                    const steam = document.createElement('div');
+                    steam.className = 'smoke absolute bg-white/20 rounded-full pointer-events-none blur-lg';
+                    steam.style.width = `${25 + Math.random()*20}px`;
+                    steam.style.height = `${25 + Math.random()*20}px`;
+                    steam.style.left = `${38 + Math.random() * 24}%`;
+                    steam.style.bottom = `${45 + Math.random() * 10}%`;
+                    steam.style.animationDelay = `${Math.random() * 1.5}s`;
+                    layer.appendChild(steam);
+                }
+            }
+        }
+
+        function startCooking() {
+            if (isCooking) return;
+            if (!simIngredient || !simTechnique) {
+                showStatusMessage("⚠️ Lengkapi Bahan Baku & Teknik dulu!", "error");
+                playBeep(250, 0.2, 0.2);
+                return;
+            }
+
+            isCooking = true;
+            document.getElementById('kitchen-status').innerText = "Sedang Mengolah...";
+            document.getElementById('kitchen-status').className = "text-amber-400 animate-pulse font-bold";
+
+            // Trigger visual progress overlay
+            const overlay = document.getElementById('cooking-progress-overlay');
+            const bar = document.getElementById('cooking-progress-bar');
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            bar.style.width = '0%';
+            
+            // Activate Appliance sound looping
+            startContinuousSound(simTechnique);
+            
+            // Add visual vibration shake to appliance
+            const appliance = document.getElementById('cooking-tool-container');
+            if (simTechnique === 'sauteeing' || simTechnique === 'frying' || simTechnique === 'grilling') {
+                appliance.classList.add('pan-shake');
+            }
+            
+            generateParticles();
+
+            // Fire stove glow
+            const glow = document.getElementById('stove-glow');
+            glow.className = "absolute bottom-1 w-32 h-6 bg-orange-600/60 rounded-full blur-xl transition-all duration-500 animate-pulse";
+
+            // Step dynamic loading text subtitles during progress
+            const subTexts = [
+                "Melakukan transfer energi termal hidrodinamis...",
+                "Merestrukturisasi protein kolagen serat bahan...",
+                "Mempercepat reaksi Maillard karamelisasi luar...",
+                "Mengunci aroma volatil asam lemak pangan..."
+            ];
+
+            let progress = 0;
+            const cookDuration = 3000; // 3 seconds virtual cooking duration
+            const stepInterval = 100;
+            
+            const cookTimer = setInterval(() => {
+                progress += (stepInterval / cookDuration) * 100;
+                bar.style.width = `${progress}%`;
+
+                // Rotate texts
+                const subIdx = Math.floor((progress / 100) * subTexts.length);
+                if (subTexts[subIdx]) {
+                    document.getElementById('cooking-progress-sub').innerText = subTexts[subIdx];
+                }
+
+                if (progress >= 100) {
+                    clearInterval(cookTimer);
+                    finishCooking();
+                }
+            }, stepInterval);
+        }
+
+        function finishCooking() {
+            isCooking = false;
+            stopContinuousSound();
+            
+            // Turn off stove glow & vibration
+            document.getElementById('stove-glow').className = "absolute bottom-1 w-32 h-6 bg-orange-600/0 rounded-full blur-xl transition-all duration-500";
+            document.getElementById('cooking-tool-container').classList.remove('pan-shake');
+
+            // Hide cooking overlay
+            document.getElementById('cooking-progress-overlay').classList.add('opacity-0', 'pointer-events-none');
+
+            // Calculate results
+            const matchKey = `${simIngredient}-${simTechnique}`;
+            const matchedObj = simulationRules[matchKey];
+            
+            const rTitle = document.getElementById('result-title');
+            const rDoneness = document.getElementById('result-doneness');
+            const rTexture = document.getElementById('result-texture');
+            const rDesc = document.getElementById('result-desc');
+            const rRating = document.getElementById('result-rating');
+            const rFoodSvg = document.getElementById('result-food-svg');
+
+            let currentResultLog = null;
+
+            if (matchedObj) {
+                playChime(matchedObj.score >= 70);
+                
+                rTitle.innerText = matchedObj.dish;
+                rDoneness.innerText = matchedObj.doneness;
+                rDoneness.className = matchedObj.score >= 90 ? "font-semibold text-green-400" : matchedObj.score >= 70 ? "font-semibold text-yellow-400" : "font-semibold text-red-400";
+                rTexture.innerText = matchedObj.texture;
+                rDesc.innerText = matchedObj.desc;
+
+                // Render stars rating
+                rRating.innerHTML = '';
+                for (let i = 0; i < 5; i++) {
+                    const star = document.createElement('i');
+                    star.className = i < matchedObj.stars ? "fa-solid fa-star" : "fa-regular fa-star opacity-30";
+                    rRating.appendChild(star);
+                }
+
+                // Inject result SVG mockup beautifully
+                rFoodSvg.innerHTML = getResultFoodGraphic(simIngredient, matchedObj.score);
+
+                // Set status text
+                showStatusMessage(`Memasak selesai! Menghasilkan: ${matchedObj.dish}`, "success");
+
+                // Jurnal model creation
+                currentResultLog = {
+                    time: new Date().toLocaleTimeString(),
+                    ingredient: simIngredient,
+                    technique: techniques.find(t => t.id === simTechnique).name,
+                    dish: matchedObj.dish,
+                    doneness: matchedObj.doneness,
+                    score: matchedObj.score,
+                    stars: matchedObj.stars
+                };
+            } else {
+                playChime(false);
+                rTitle.innerText = "Produk Gagal";
+                rDoneness.innerText = "Rusak / Gosong";
+                rDoneness.className = "font-semibold text-red-500";
+                rTexture.innerText = "Tidak Layak Konsumsi";
+                rDesc.innerText = "Suhu dan teknik pengolahan ini tidak sesuai dengan karakteristik zat gizi bahan baku pangan kontinental tersebut.";
+                
+                rRating.innerHTML = '<i class="fa-regular fa-star opacity-30"></i><i class="fa-regular fa-star opacity-30"></i><i class="fa-regular fa-star opacity-30"></i>';
+                rFoodSvg.innerHTML = `<span class="text-5xl filter grayscale">🤮</span>`;
+                
+                showStatusMessage("Memasak gagal! Produk tidak layak saji.", "error");
+
+                currentResultLog = {
+                    time: new Date().toLocaleTimeString(),
+                    ingredient: simIngredient,
+                    technique: techniques.find(t => t.id === simTechnique).name,
+                    dish: "Produk Gagal / Gosong",
+                    doneness: "Tidak layak saji",
+                    score: 20,
+                    stars: 0
+                };
+            }
+
+            // Save log temporarily to be added via "Catat di LKPD" action
+            window.latestResultLog = currentResultLog;
+
+            // Show result modal
+            const resultOverlay = document.getElementById('result-overlay');
+            resultOverlay.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+            resultOverlay.classList.add('scale-100');
+        }
+
+        function getResultFoodGraphic(ingId, score) {
+            // Generates elegant custom vectors dynamically depending on results
+            const colorClass = score >= 80 ? '#f59e0b' : score >= 60 ? '#b45309' : '#1e293b';
+            
+            if (ingId === 'beef') {
+                return `
+                    <svg viewBox="0 0 100 100" class="w-full h-full animate-bounce">
+                        <path d="M20 50 C20 30, 80 30, 80 50 C80 70, 20 70, 20 50" fill="${colorClass}" stroke="#78350f" stroke-width="2"/>
+                        <!-- Sear lines -->
+                        <line x1="35" y1="40" x2="45" y2="60" stroke="#451a03" stroke-width="2"/>
+                        <line x1="45" y1="40" x2="55" y2="60" stroke="#451a03" stroke-width="2"/>
+                        <line x1="55" y1="40" x2="65" y2="60" stroke="#451a03" stroke-width="2"/>
+                        <!-- Parsley topping -->
+                        <circle cx="42" cy="42" r="2" fill="#22c55e"/>
+                        <circle cx="58" cy="48" r="1.5" fill="#22c55e"/>
+                    </svg>
+                `;
+            } else if (ingId === 'potato') {
+                return `
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <!-- Plate -->
+                        <circle cx="50" cy="50" r="40" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+                        <!-- Potatoes gold -->
+                        <ellipse cx="45" cy="48" rx="15" ry="10" fill="${colorClass}" opacity="0.9"/>
+                        <ellipse cx="56" cy="52" rx="12" ry="12" fill="${colorClass}"/>
+                    </svg>
+                `;
+            } else if (ingId === 'fish') {
+                return `
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <circle cx="50" cy="50" r="40" fill="#f8fafc" stroke="#cbd5e1"/>
+                        <path d="M30 50 C40 38, 60 38, 70 50 C60 62, 40 62, 30 50" fill="${colorClass}"/>
+                        <!-- Lemon slice -->
+                        <circle cx="48" cy="44" r="5" fill="#facc15"/>
+                    </svg>
+                `;
+            } else if (ingId === 'dough') {
+                return `
+                    <svg viewBox="0 0 100 100" class="w-full h-full animate-pulse">
+                        <!-- Croissant layered gold path -->
+                        <path d="M25 55 C30 45, 70 45, 75 55" fill="${colorClass}" stroke="#78350f" stroke-width="1.5"/>
+                        <path d="M35 52 C40 40, 60 40, 65 52" fill="${colorClass}"/>
+                        <path d="M42 48 C45 38, 55 38, 58 48" fill="${colorClass}"/>
+                    </svg>
+                `;
+            } else if (ingId === 'vegetables') {
+                return `
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <!-- Broccoli crowns -->
+                        <circle cx="40" cy="45" r="12" fill="#15803d"/>
+                        <circle cx="55" cy="42" r="10" fill="#166534"/>
+                        <circle cx="48" cy="55" r="11" fill="#15803d"/>
+                        <!-- Glaze grease shiny -->
+                        <path d="M36 42 Q40 38 44 42" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.6"/>
+                    </svg>
+                `;
+            } else {
+                // Yogurt / Milk Jar / Cheese blocks
+                return `
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <rect x="35" y="30" width="30" height="40" rx="4" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/>
+                        <rect x="38" y="42" width="24" height="15" fill="#22c55e" opacity="0.3"/>
+                        <text x="50" y="53" fill="#166534" font-size="6" font-weight="extrabold" text-anchor="middle">LACTO</text>
+                    </svg>
+                `;
+            }
+        }
+
+        function closeResult() {
+            const resultOverlay = document.getElementById('result-overlay');
+            resultOverlay.classList.remove('scale-100');
+            resultOverlay.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
+        }
+
+        function claimToLKPD() {
+            if (window.latestResultLog) {
+                // Check for duplicates
+                const isDup = logs.some(l => l.ingredient === window.latestResultLog.ingredient && l.technique === window.latestResultLog.technique);
+                if (isDup) {
+                    showStatusMessage("⚠️ Hasil simulasi kombinasi ini sudah tercatat!", "error");
+                    playBeep(200, 0.2, 0.2);
+                } else {
+                    logs.push(window.latestResultLog);
+                    playChime(true);
+                    showStatusMessage("📝 Berhasil menyalin hasil ke Jurnal LKPD!", "success");
+                    
+                    // Direct user view update to LKPD Counter
+                    document.getElementById('jurnal-count').innerText = `${logs.length} Eksperimen`;
+                }
+                closeResult();
+            }
+        }
+
+
+        // --- 7. LKPD & INTERACTIVE EVALUATION ---
+        function renderLKPD() {
+            // Update logs table
+            const jurContainer = document.getElementById('jurnal-container');
+            if (logs.length === 0) {
+                jurContainer.innerHTML = `
+                    <div class="text-[11px] text-slate-500 text-center py-6 italic border border-dashed border-slate-800 rounded-lg">
+                        Belum ada catatan simulasi. Lakukan simulasi dan klik "Catat di LKPD" untuk menyimpan jurnal.
+                    </div>
+                `;
+            } else {
+                jurContainer.innerHTML = '';
+                logs.forEach((log, idx) => {
+                    const row = document.createElement('div');
+                    row.className = "bg-slate-950/80 p-2.5 rounded-lg border border-slate-800 flex justify-between items-center text-[11px]";
+                    row.innerHTML = `
+                        <div class="space-y-0.5">
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-bold text-slate-200">${log.dish}</span>
+                                <span class="text-[9px] text-amber-500/80 italic">(${log.technique})</span>
+                            </div>
+                            <div class="text-[10px] text-slate-400 flex gap-2">
+                                <span>Doneness: <strong class="text-green-400">${log.doneness}</strong></span>
+                                <span>• Skor: <strong class="text-amber-500">${log.score}</strong></span>
+                            </div>
+                        </div>
+                        <button onclick="removeLog(${idx})" class="text-red-400 hover:text-red-300 p-1"><i class="fa-regular fa-trash-can"></i></button>
+                    `;
+                    jurContainer.appendChild(row);
+                });
+            }
+
+            // Render evaluation quiz questions
+            const qContainer = document.getElementById('quiz-questions');
+            qContainer.innerHTML = '';
+
+            quizQuestions.forEach(q => {
+                const qCard = document.createElement('div');
+                qCard.className = "bg-slate-950/40 border border-slate-800 p-3 rounded-lg space-y-2";
+                
+                let optionsHtml = q.options.map(opt => `
+                    <label class="flex items-start gap-2 cursor-pointer p-1.5 rounded hover:bg-slate-900/50 transition-colors">
+                        <input type="radio" name="q-${q.id}" value="${opt.val}" class="mt-0.5 accent-amber-500">
+                        <span class="text-slate-300 leading-normal"><strong class="text-amber-500">${opt.val}.</strong> ${opt.text}</span>
+                    </label>
+                `).join('');
+
+                qCard.innerHTML = `
+                    <p class="font-semibold text-slate-200 leading-normal">${q.id}. ${q.text}</p>
+                    <div class="space-y-1 pl-1">
+                        ${optionsHtml}
+                    </div>
+                `;
+                qContainer.appendChild(qCard);
+            });
+        }
+
+        function removeLog(idx) {
+            logs.splice(idx, 1);
+            playBeep(300, 0.1, 0.1);
+            renderLKPD();
+            document.getElementById('jurnal-count').innerText = `${logs.length} Eksperimen`;
+        }
+
+        function submitQuiz() {
+            let correctCount = 0;
+            let answeredCount = 0;
+
+            quizQuestions.forEach(q => {
+                const selected = document.querySelector(`input[name="q-${q.id}"]:checked`);
+                if (selected) {
+                    answeredCount++;
+                    if (selected.value === q.correct) {
+                        correctCount++;
+                    }
+                }
+            });
+
+            if (answeredCount < quizQuestions.length) {
+                showStatusMessage("⚠️ Kerjakan semua pertanyaan evaluasi terlebih dahulu!", "error");
+                playBeep(250, 0.2, 0.2);
+                return;
+            }
+
+            const finalScore = Math.round((correctCount / quizQuestions.length) * 100);
+            document.getElementById('quiz-score').innerText = `Skor: ${finalScore} / 100`;
+
+            if (finalScore >= 70) {
+                playChime(true);
+                showStatusMessage(`Evaluasi Dinilai! Anda LULUS dengan nilai ${finalScore}.`, "success");
+            } else {
+                playChime(false);
+                showStatusMessage(`Evaluasi Dinilai. Nilai Anda: ${finalScore}. Silakan pelajari tab Teori kembali.`, "error");
+            }
+        }
+
+        function printReport() {
+            const studentName = document.getElementById('student-name').value;
+            const studentClass = document.getElementById('student-class').value;
+            const scoreText = document.getElementById('quiz-score').innerText;
+
+            let logsHtml = logs.map((l, i) => `
+                <tr>
+                    <td style="border:1px solid #ddd; padding:8px; text-align:center;">${i+1}</td>
+                    <td style="border:1px solid #ddd; padding:8px;"><b>${l.dish}</b></td>
+                    <td style="border:1px solid #ddd; padding:8px;">${l.technique}</td>
+                    <td style="border:1px solid #ddd; padding:8px; color:#166534;">${l.doneness}</td>
+                    <td style="border:1px solid #ddd; padding:8px; text-align:center; font-weight:bold;">${l.score}</td>
+                </tr>
+            `).join('');
+
+            if (logs.length === 0) {
+                logsHtml = `<tr><td colspan="5" style="border:1px solid #ddd; padding:12px; text-align:center; color:#888; font-style:italic;">Belum melakukan eksperimen di simulasi dapur.</td></tr>`;
+            }
+
+            const reportWindow = window.open('', '_blank');
+            reportWindow.document.write(`
+                <html>
+                <head>
+                    <title>Laporan Praktikum Lab Maya - Olahan Kontinental</title>
+                    <style>
+                        body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
+                        .header { text-align: center; border-bottom: 3px double #2563eb; padding-bottom: 15px; margin-bottom: 30px; }
+                        .header h1 { margin: 0; font-size: 24px; color: #1e3a8a; }
+                        .header p { margin: 5px 0 0; font-size: 14px; color: #555; }
+                        .bio-box { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; margin-bottom: 25px; background: #f8fafc; }
+                        .bio-box table { width: 100%; }
+                        .bio-box td { padding: 4px 0; font-size: 14px; }
+                        h2 { font-size: 16px; color: #1e3a8a; border-left: 4px solid #f59e0b; padding-left: 10px; margin-top: 30px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+                        th { background: #1e3a8a; color: white; border: 1px solid #1e3a8a; padding: 10px; font-weight: bold; }
+                        .footer { margin-top: 60px; text-align: center; font-size: 11px; color: #888; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>LAPORAN PRAKTIKUM LABORATORIUM MAYA</h1>
+                        <p>Teknik Pengolahan Produk Olahan Pangan Kontinental (Fase F - Kelas XI)</p>
+                    </div>
+
+                    <div class="bio-box">
+                        <table>
+                            <tr>
+                                <td style="width:15%"><b>Nama Siswa</b></td>
+                                <td style="width:35%">: ${studentName}</td>
+                                <td style="width:20%"><b>Mata Pelajaran</b></td>
+                                <td style="width:30%">: PKWU (Pengolahan)</td>
+                            </tr>
+                            <tr>
+                                <td><b>Kelas / Presensi</b></td>
+                                <td>: ${studentClass}</td>
+                                <td><b>Status Evaluasi</b></td>
+                                <td>: <b>${scoreText}</b></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <h2>1. JURNAL EKSPERIMEN SIMULASI DAPUR</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:8%">No</th>
+                                <th style="width:32%">Nama Hidangan Akhir</th>
+                                <th style="width:25%">Teknik Pengolahan</th>
+                                <th style="width:20%">Kematangan</th>
+                                <th style="width:15%">Nilai Kerja</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${logsHtml}
+                        </tbody>
+                    </table>
+
+                    <h2>2. REFLEKSI & ANALISIS MANDIRI</h2>
+                    <p style="font-size: 13px; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; min-height: 100px; color:#555; font-style:italic;">
+                        Tuliskan analisis Anda mengenai perbedaan pengaruh teknik pengolahan kering (seperti grilling/roasting) dengan pengolahan basah (seperti steaming/boiling) terhadap retensi zat gizi dan perubahan fisik bahan baku kontinental yang telah Anda simulasikan di atas...
+                    </p>
+
+                    <div style="margin-top:50px; display:flex; justify-content:space-between; font-size:13px;">
+                        <div style="text-align:center; width:200px;">
+                            <p>Mengetahui,</p>
+                            <br><br><br>
+                            <p>____________________<br><b>Guru Mata Pelajaran</b></p>
+                        </div>
+                        <div style="text-align:center; width:200px;">
+                            <p>Siswa Yang Bersangkutan,</p>
+                            <br><br><br>
+                            <p><b>${studentName}</b><br>NISN.</p>
+                        </div>
+                    </div>
+
+                    <div class="footer">
+                        Dokumen laporan ini dicetak secara digital via Lab Maya Kuliner Kontinental PKWU SMAN.
+                    </div>
+
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `);
+            reportWindow.document.close();
+        }
+
+
+        // --- 8. INITIALIZE PAGE ON WINDOW LOAD ---
+        window.onload = function() {
+            // Run Splash Screen loading simulation automatically
+            runSplashLoading();
+        }
+    </script>
+</body>
+</html>
